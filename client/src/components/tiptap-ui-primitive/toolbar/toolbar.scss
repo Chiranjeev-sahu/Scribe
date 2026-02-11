@@ -1,0 +1,118 @@
+:root {
+  --tt-toolbar-height: 2.75rem;
+  --tt-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --tt-toolbar-bg-color: var(--white);
+  --tt-toolbar-border-color: var(--tt-gray-light-a-100);
+}
+
+.dark {
+  --tt-toolbar-bg-color: var(--black);
+  --tt-toolbar-border-color: var(--tt-gray-dark-a-50);
+}
+
+.tiptap-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  &-group {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+
+    &:empty {
+      display: none;
+    }
+
+    &:empty + .tiptap-separator,
+    .tiptap-separator + &:empty {
+      display: none;
+    }
+  }
+
+  &[data-variant="fixed"] {
+    // Shared base styles
+    z-index: 10;
+    background: var(--tt-toolbar-bg-color);
+
+    // --- DESKTOP: Left Sidebar (min-width: 481px) ---
+    @media (min-width: 481px) {
+      position: sticky;
+      left: 0;
+      top: 0;
+      height: 100vh; /* Full height */
+      width: 3.5rem; /* Fixed width */
+      flex-direction: column;
+      border-right: 1px solid var(--tt-toolbar-border-color);
+      padding: 1rem 0.5rem;
+      overflow-y: auto; /* Scroll vertically if needed */
+      overflow-x: hidden;
+
+      // Rotate separators to be horizontal
+      .tiptap-separator {
+        width: 100% !important;
+        height: 1px !important;
+        margin: 0.5rem 0;
+      }
+
+      // Vertical stacking for groups
+      .tiptap-toolbar-group {
+        flex-direction: column;
+        width: 100%;
+      }
+    }
+
+    // --- MOBILE: Bottom Bar (max-width: 480px) ---
+    @media (max-width: 480px) {
+      position: fixed; /* Or absolute depending on your layout need */
+      bottom: 0; /* Stick to bottom */
+      left: 0;
+      right: 0;
+      width: 100%;
+      min-height: var(--tt-toolbar-height);
+      border-top: 1px solid var(--tt-toolbar-border-color);
+      padding: 0 0.5rem calc(var(--tt-safe-area-bottom) + 0.5rem);
+      overflow-x: auto;
+
+      // Ensure horizontal layout for mobile
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .tiptap-toolbar-group {
+        flex: 0 0 auto;
+      }
+    }
+  }
+
+  &[data-variant="floating"] {
+    --tt-toolbar-padding: 0.125rem;
+    --tt-toolbar-border-width: 1px;
+
+    padding: 0.188rem;
+    border-radius: calc(
+      var(--tt-toolbar-padding) + var(--tt-radius-lg) +
+        var(--tt-toolbar-border-width)
+    );
+    border: var(--tt-toolbar-border-width) solid var(--tt-toolbar-border-color);
+    background-color: var(--tt-toolbar-bg-color);
+    box-shadow: var(--tt-shadow-elevated-md);
+    outline: none;
+    overflow: hidden;
+
+    &[data-plain="true"] {
+      padding: 0;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      background-color: transparent;
+    }
+
+    @media screen and (max-width: 480px) {
+      width: 100%;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+    }
+  }
+}
