@@ -73,12 +73,15 @@ body,
   display: flex;
   flex-direction: row;
   flex: 1;
+  width: 100%;
   overflow-y: auto;
 }
 
 .simple-editor-content .tiptap.ProseMirror.simple-editor {
   flex: 1;
   padding: 3rem 0;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 
   /* Text Elements: Centered with max-width 648px */
   > p,
@@ -94,11 +97,9 @@ body,
   > blockquote,
   > pre,
   > div:not(.tiptap-image-upload) {
-    max-width: 748px;
+    max-width: 768px;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
   }
 
   /* Images: 70% width and centered */
@@ -126,6 +127,6 @@ body,
 
 @media screen and (max-width: 480px) {
   .simple-editor-content .tiptap.ProseMirror.simple-editor {
-    padding: 1rem 1.5rem 30vh;
+    padding: 1rem 1rem 30vh;
   }
 }

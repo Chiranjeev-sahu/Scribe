@@ -44,7 +44,11 @@
       width: 3.5rem; /* Fixed width */
       flex-direction: column;
       border-right: 1px solid var(--tt-toolbar-border-color);
+      border-top: 1px solid var(--tt-toolbar-border-color);
+      border-bottom: 1px solid var(--tt-toolbar-border-color);
+      border-radius: 0 0.75rem 0.75rem 0;
       padding: 1rem 0.5rem;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
       overflow-y: auto; /* Scroll vertically if needed */
       overflow-x: hidden;
 
