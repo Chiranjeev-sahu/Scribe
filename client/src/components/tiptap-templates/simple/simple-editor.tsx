@@ -189,7 +189,7 @@ export function SimpleEditor({ onUpdate, initialContent }: SimpleEditorProps) {
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
-    immediatelyRender: false,
+    immediatelyRender: true,
     editorProps: {
       attributes: {
         autocomplete: "off",
@@ -209,7 +209,9 @@ export function SimpleEditor({ onUpdate, initialContent }: SimpleEditorProps) {
         },
       }),
       HorizontalRule,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TextAlign.configure({
+        types: ["heading", "paragraph", "blockquote", "codeBlock", "listItem"],
+      }),
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
@@ -221,12 +223,13 @@ export function SimpleEditor({ onUpdate, initialContent }: SimpleEditorProps) {
       ImageUploadNode.configure({
         accept: "image/*",
         maxSize: MAX_FILE_SIZE,
-        limit: 3,
+        limit: 1,
         upload: handleImageUpload,
         onError: (error) => console.error("Upload failed:", error),
       }),
       Placeholder.configure({
-        placeholder: "Write something amazing...",
+        placeholder: ({ editor }) =>
+          editor.isEmpty ? "Write something amazing..." : "",
       }),
     ],
     content: initialContent,
@@ -253,9 +256,7 @@ export function SimpleEditor({ onUpdate, initialContent }: SimpleEditorProps) {
           ref={toolbarRef}
           style={{
             ...(isMobile
-              ? {
-                  bottom: `calc(100% - ${height - rect.y}px)`,
-                }
+              ? { bottom: `calc(100% - ${height - rect.y}px)` }
               : {}),
           }}
         >

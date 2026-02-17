@@ -429,7 +429,6 @@ const DropZoneContent: React.FC<{ maxSize: number; limit: number }> = ({
       </span>
       <span className="tiptap-image-upload-subtext">
         Maximum {limit} file{limit === 1 ? "" : "s"}, {maxSize / 1024 / 1024}MB
-        each.
       </span>
     </div>
   </>
