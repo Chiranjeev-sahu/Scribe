@@ -376,17 +376,30 @@ export const handleImageUpload = async (
     );
   }
 
-  // For demo/testing: Simulate upload progress. In production, replace the following code
-  // with your own upload implementation.
-  for (let progress = 0; progress <= 100; progress += 10) {
-    if (abortSignal?.aborted) {
-      throw new Error("Upload cancelled");
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    onProgress?.({ progress });
-  }
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append(
+    "upload_preset",
+    `${import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET}`
+  );
+  try {
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method: "post",
+        body: formData,
+        signal: abortSignal,
+      }
+    );
+    const imgData = await response.json();
+    onProgress?.({ progress: 100 });
+    console.log(imgData);
 
-  return "https://placehold.co/600x400";
+    return `${imgData.secure_url}`;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Image upload failed");
+  }
 };
 
 type ProtocolOptions = {
