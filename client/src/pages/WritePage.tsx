@@ -138,6 +138,7 @@ export function WritePage() {
           <textarea
             ref={textareaRef}
             value={title}
+            maxLength={100}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Article Title..."
             rows={1}
