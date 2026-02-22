@@ -1,4 +1,4 @@
-import { AuthRequest } from '@/middlewares/verifyJwt.js';
+import { AuthRequest } from '@/types/index.js';
 import { Post } from '@/models/post.model.js';
 import { APIResponse } from '@/util/apiResponse.js';
 import { asyncHandler } from '@/util/asyncHandler.js';

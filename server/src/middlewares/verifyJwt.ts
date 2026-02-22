@@ -1,21 +1,11 @@
 import { IUser, IUserMethods, User } from '@/models/user.model.js';
+import { DecodedToken } from '@/types/index.js';
 import { AppError } from '@/util/appError.js';
 import { asyncHandler } from '@/util/asyncHandler.js';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { HydratedDocument } from 'mongoose';
-interface DecodedToken extends jwt.JwtPayload {
-  _id: string;
-}
-export interface AuthRequest<
-  P = any,
-  ResBody = any,
-  ReqBody = any,
-  ReqQuery = any,
-> extends Request<P, ResBody, ReqBody, ReqQuery> {
-  user?: HydratedDocument<IUser, IUserMethods>;
-}
-
+import { AuthRequest } from '@/types/index.js';
 export const verify = asyncHandler(
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     const token = req.cookies?.accessToken;

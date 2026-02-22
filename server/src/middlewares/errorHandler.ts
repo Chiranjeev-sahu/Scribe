@@ -18,6 +18,16 @@ export const errorHandler = (
     errors = err.issues;
   }
 
+  if (err.name === 'TokenExpiredError') {
+    statusCode = 401;
+    message = 'Your session has expired. Please log in again.';
+  }
+
+  if (err.name === 'JsonWebTokenError') {
+    statusCode = 401;
+    message = 'Invalid token. Please log in again.';
+  }
+
   if (process.env.NODE_ENV === 'development') {
     return res.status(statusCode).json({
       success: false,
@@ -27,7 +37,11 @@ export const errorHandler = (
     });
   }
 
-  const isOperational = err.isOperational || err instanceof ZodError;
+  const isOperational =
+    err.isOperational ||
+    err instanceof ZodError ||
+    err.name === 'TokenExpiredError' ||
+    err.name === 'JsonWebTokenError';
 
   if (isOperational) {
     return res.status(statusCode).json({

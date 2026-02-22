@@ -1,5 +1,5 @@
 import { cookieOptions } from '@/config/cookieOptions.js';
-import { AuthRequest } from '@/middlewares/verifyJwt.js';
+import { AuthRequest, DecodedToken } from '@/types/index.js';
 import { User } from '@/models/user.model.js';
 import { APIResponse } from '@/util/apiResponse.js';
 import { AppError } from '@/util/appError.js';
@@ -7,6 +7,7 @@ import { asyncHandler } from '@/util/asyncHandler.js';
 import { sendAuthResponsewithTokens } from '@/util/auth.utils.js';
 import { loginType, signupType } from '@/validators/auth.schema.js';
 import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 
 export const signup = asyncHandler(
   async (req: Request<{}, {}, signupType>, res: Response) => {
@@ -93,3 +94,42 @@ export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
     .clearCookie('refreshToken', cookieOptions)
     .json(new APIResponse(200, {}, 'User logged out successfully'));
 });
+
+export const refreshAccessToken = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      throw new AppError(401, 'Unauthorized');
+    }
+
+    const verified = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET as string
+    ) as DecodedToken;
+
+    const user = await User.findById(verified._id);
+
+    if (!user) {
+      throw new AppError(401, 'Invalid refresh token');
+    }
+
+    if (user.refreshToken !== refreshToken) {
+      throw new AppError(401, 'Refresh token is expired or used');
+    }
+
+    const userResponse = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar,
+      bio: user.bio,
+    };
+
+    return await sendAuthResponsewithTokens(
+      res,
+      userResponse,
+      200,
+      'Access token refreshed successfully'
+    );
+  }
+);
