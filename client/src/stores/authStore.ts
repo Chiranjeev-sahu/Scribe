@@ -1,95 +1,218 @@
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  AUTH STORE — Design Notes & Tips
+ * ═══════════════════════════════════════════════════════════════
+ *
+ *  PURPOSE:
+ *    Owns the user's identity and authentication lifecycle.
+ *    This is the ONLY store that should know about login/signup/logout.
+ *
+ *  DESIGN TIPS:
+ *
+ *  1. DO NOT persist sensitive data in localStorage.
+ *     Your tokens live in HttpOnly cookies — the browser manages them.
+ *     The `persist` middleware should ONLY store minimal display data
+ *     (username, avatar) so the UI doesn't flash "logged out" on refresh.
+ *     The REAL source of truth is `checkAuth()` hitting `/api/users/me`.
+ *
+ *  2. checkAuth() is your app's "boot sequence".
+ *     Call it once in your root component (App.tsx or a provider).
+ *     It answers: "Does the user's cookie still represent a valid session?"
+ *     Until it resolves, show a loading spinner, NOT the login page.
+ *
+ *  3. Keep `UserData` lean.
+ *     Only store what the UI frequently needs (username, avatar, email, bio).
+ *     Don't store bookmarks[] here — that's the bookmark store's job.
+ *
+ *  4. logout() should be a "scorched earth" operation.
+ *     When the user logs out, EVERY store that holds user-specific data
+ *     (bookmarks, drafts, editor) must also reset. Think about how to
+ *     coordinate this. Options:
+ *       a) Import other stores and call their reset inside logout
+ *       b) Use Zustand's `subscribe` to react to auth changes
+ *       c) Have a top-level `useEffect` that watches `isAuthenticated`
+ *
+ *  5. Error handling pattern:
+ *     Set `error` before the try block? Or only in catch?
+ *     Think about clearing stale errors — if the user had a login error
+ *     and then tries again, the old error should disappear immediately.
+ *
+ * ═══════════════════════════════════════════════════════════════
+ */
+import type { AxiosError } from "axios";
+import axios from "axios";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import client from "@/api/client";
+
+// ── Types ──────────────────────────────────────────────────────
+
 interface UserData {
-  userName: string;
+  _id: string;
+  username: string;
   email: string;
-  password?: string;
+  avatar?: string;
+  bio?: string;
 }
 
 interface AuthState {
   userData: UserData | null;
-  error: string | null;
+  isAuthenticated: boolean;
   loading: boolean;
+  error: string | null;
 }
 
 interface AuthActions {
   signup: (
-    userName: string,
+    username: string,
     email: string,
     password: string
   ) => Promise<boolean>;
-  login: (userName: string, password: string) => Promise<boolean>;
-  logout: () => Promise<boolean>;
+  login: (identifier: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
+  updateUserData: (partial: Partial<UserData>) => void;
+  clearError: () => void;
 }
 
-const MOCK_DB_KEY = "scribe-mock-users-db";
-
-const getMockUsers = (): UserData[] => {
-  const users = localStorage.getItem(MOCK_DB_KEY);
-  return users ? JSON.parse(users) : [];
-};
-
-const addMockUser = (user: UserData) => {
-  const users = getMockUsers();
-  users.push(user);
-  localStorage.setItem(MOCK_DB_KEY, JSON.stringify(users));
-};
+// ── Store ──────────────────────────────────────────────────────
 
 export const useAuthStore = create<AuthState & AuthActions>()(
   persist(
-    (set) => ({
+    (set, get) => ({
+      // ── Initial State ──
       userData: null,
-      error: null,
+      isAuthenticated: false,
       loading: false,
+      error: null,
 
-      signup: async (userName, email, password) => {
-        set({ loading: true, error: null });
+      // ── Actions ──
 
-        await new Promise((resolve) => setTimeout(resolve, 800));
+      signup: async (username, email, password) => {
+        //  * TODO: Implement signup
 
-        const existingUsers = getMockUsers();
-        if (existingUsers.find((u) => u.email === email)) {
-          set({ loading: false, error: "User already exists" });
-          return false;
+        //  * 1. Set loading to true and clear any previous error
+        get().clearError();
+        set({ loading: true });
+        //  * 2. Make a POST request to `/auth/register` with { username, email, password }
+        //  *    - Use your `client` axios instance from `@/api/client`
+        try {
+          const response = await client.post("/auth/signup", {
+            username,
+            email,
+            password,
+          });
+
+          set({
+            userData: response.data.data,
+            loading: false,
+            isAuthenticated: true,
+          });
+          return true;
+        } catch (error) {
+          let errMessage = "Signup failed";
+
+          if (axios.isAxiosError(error)) {
+            errMessage = error.response?.data?.message || errMessage;
+          }
+
+          set({ error: errMessage, loading: false });
         }
-
-        const newUser = { userName, email, password };
-        addMockUser(newUser); // Save to our "Mock DB"
-
-        set({ userData: newUser, loading: false });
-        return true;
+        return false; // placeholder
       },
 
-      login: async (userName, password) => {
-        set({ loading: true, error: null });
+      login: async (identifier, password) => {
+        get().clearError();
+        set({ loading: true });
 
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        try {
+          const response = await client.post("/auth/login", {
+            identifier,
+            password,
+          });
 
-        const users = getMockUsers();
-        const user = users.find(
-          (u) =>
-            (u.userName === userName || u.email === userName) &&
-            u.password === password
-        );
-
-        if (user) {
-          set({ userData: user, loading: false });
+          set({
+            userData: response.data.data,
+            loading: false,
+            isAuthenticated: true,
+          });
           return true;
-        } else {
-          set({ error: "Invalid credentials", loading: false });
-          return false;
+        } catch (error) {
+          let errMessage = "Login failed";
+
+          if (axios.isAxiosError(error)) {
+            errMessage = error.response?.data?.message || errMessage;
+          }
+
+          set({ error: errMessage, loading: false });
         }
+        return false;
       },
 
       logout: async () => {
-        set({ userData: null, error: null });
-        return true;
+        try {
+          await client.post("/auth/logout");
+        } catch {
+        } finally {
+          set({
+            userData: null,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
+          });
+
+          // Reset other stores that hold user-specific data
+          // TODO: uncomment these once those stores are implemented
+          // useBookmarkStore.getState().resetBookmarks();
+          // useDraftsStore.getState().resetDrafts();
+          // useEditorStore.getState().resetEditor();
+        }
+      },
+
+      checkAuth: async () => {
+        set({ loading: true });
+        try {
+          const response = await client.get("/user/me");
+          set({
+            userData: response.data.data,
+            isAuthenticated: true,
+            loading: false,
+          });
+        } catch (error) {
+          set({ userData: null, isAuthenticated: false, loading: false });
+        }
+
+        //  * THINK ABOUT:
+        //  *  - This fires on every app load. If the access token is expired but the
+        //  *    refresh token is valid, your Axios interceptor handles it silently.
+        //  *    So this "just works" — understand why!
+      },
+
+      updateUserData: (partial) => {
+        const current = get().userData;
+        if (!current) return;
+        set({ userData: { ...current, ...partial } });
+        //  * WHEN IS THIS USED?
+        //  *  - After the user updates their profile (bio, avatar) on the settings page.
+        //  *  - You already have the updated data from the API response — no need to
+        //  *    re-fetch /me. Just merge locally.
+      },
+
+      clearError: () => {
+        set({ error: null });
+        //  * WHEN TO CALL:
+        //  *  - At the start of every new login/signup attempt
+        //  *  - When the user starts typing in the auth form (clears stale errors)
+        //  *  - When navigating away from the auth page
       },
     }),
     {
       name: "auth-storage",
-      partialize: (state) => ({ userData: state.userData }),
+      partialize: (state) => ({
+        userData: state.userData,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );
