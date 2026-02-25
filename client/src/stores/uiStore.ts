@@ -65,69 +65,25 @@ export const useUIStore = create<UIState & UIActions>()(
       // ── Actions ──
 
       openPublishModal: () => {
-        /**
-         * TODO: Implement openPublishModal
-         *
-         * 1. set({ isPublishModalOpen: true })
-         *
-         * CALLED BY:
-         *  - The "Publish" button in the WritePage toolbar
-         *
-         * THINK ABOUT:
-         *  - Should you also extract the summary here (from the editor store)?
-         *    e.g. useEditorStore.getState().setSummary(extractedText)
-         *    Or should the PublishModal component handle that on mount?
-         *    Keeping the store simple is usually better — let the component do it.
-         */
+        set({ isPublishModalOpen: true })
       },
 
       closePublishModal: () => {
-        /**
-         * TODO: Implement closePublishModal
-         *
-         * 1. set({ isPublishModalOpen: false })
-         */
+        set({ isPublishModalOpen: false });
       },
 
       toggleSidebar: () => {
-        /**
-         * TODO: Implement toggleSidebar
-         *
-         * 1. set({ isSidebarOpen: !get().isSidebarOpen })
-         *
-         * USED FOR:
-         *  - Mobile navigation hamburger menu
-         *  - Collapsible sidebar on dashboard layouts
-         */
+        set({ isSidebarOpen: !get().isSidebarOpen });
       },
 
       setTheme: (theme) => {
-        /**
-         * TODO: Implement setTheme
-         *
-         * 1. set({ theme })
-         * 2. Apply the theme to the document:
-         *    document.documentElement.setAttribute('data-theme', theme)
-         *    OR toggle a class: document.documentElement.classList.toggle('dark')
-         *
-         * THINK ABOUT:
-         *  - Where do you set the initial theme on app load?
-         *    Since this store is persisted, the theme value survives refresh.
-         *    But you also need to APPLY it to the DOM on load.
-         *    Options:
-         *      a) Use Zustand's `onRehydrateStorage` callback
-         *      b) A useEffect in your root App component
-         */
+        set({ theme });
+        document.documentElement.classList.toggle('dark', theme === 'dark');
       },
 
       toggleTheme: () => {
-        /**
-         * TODO: Implement toggleTheme
-         *
-         * 1. const newTheme = get().theme === 'light' ? 'dark' : 'light'
-         * 2. Call get().setTheme(newTheme) — reuse the logic from setTheme
-         *    so the DOM update isn't duplicated
-         */
+        const newTheme = get().theme === 'light' ? 'dark' : 'light';
+        get().setTheme(newTheme);
       },
     }),
     {

@@ -1,52 +1,12 @@
-/**
- * ═══════════════════════════════════════════════════════════════
- *  AUTH STORE — Design Notes & Tips
- * ═══════════════════════════════════════════════════════════════
- *
- *  PURPOSE:
- *    Owns the user's identity and authentication lifecycle.
- *    This is the ONLY store that should know about login/signup/logout.
- *
- *  DESIGN TIPS:
- *
- *  1. DO NOT persist sensitive data in localStorage.
- *     Your tokens live in HttpOnly cookies — the browser manages them.
- *     The `persist` middleware should ONLY store minimal display data
- *     (username, avatar) so the UI doesn't flash "logged out" on refresh.
- *     The REAL source of truth is `checkAuth()` hitting `/api/users/me`.
- *
- *  2. checkAuth() is your app's "boot sequence".
- *     Call it once in your root component (App.tsx or a provider).
- *     It answers: "Does the user's cookie still represent a valid session?"
- *     Until it resolves, show a loading spinner, NOT the login page.
- *
- *  3. Keep `UserData` lean.
- *     Only store what the UI frequently needs (username, avatar, email, bio).
- *     Don't store bookmarks[] here — that's the bookmark store's job.
- *
- *  4. logout() should be a "scorched earth" operation.
- *     When the user logs out, EVERY store that holds user-specific data
- *     (bookmarks, drafts, editor) must also reset. Think about how to
- *     coordinate this. Options:
- *       a) Import other stores and call their reset inside logout
- *       b) Use Zustand's `subscribe` to react to auth changes
- *       c) Have a top-level `useEffect` that watches `isAuthenticated`
- *
- *  5. Error handling pattern:
- *     Set `error` before the try block? Or only in catch?
- *     Think about clearing stale errors — if the user had a login error
- *     and then tries again, the old error should disappear immediately.
- *
- * ═══════════════════════════════════════════════════════════════
- */
-import type { AxiosError } from "axios";
 import axios from "axios";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import client from "@/api/client";
+import { useBookmarkStore } from "./bookmarkStore";
+import { useDraftsStore } from "./draftsStore";
+import { useEditorStore } from "./editorStore";
 
-// ── Types ──────────────────────────────────────────────────────
 
 interface UserData {
   _id: string;
@@ -76,27 +36,22 @@ interface AuthActions {
   clearError: () => void;
 }
 
-// ── Store ──────────────────────────────────────────────────────
 
 export const useAuthStore = create<AuthState & AuthActions>()(
   persist(
     (set, get) => ({
-      // ── Initial State ──
+
       userData: null,
       isAuthenticated: false,
       loading: false,
       error: null,
 
-      // ── Actions ──
 
       signup: async (username, email, password) => {
-        //  * TODO: Implement signup
-
-        //  * 1. Set loading to true and clear any previous error
+        
         get().clearError();
         set({ loading: true });
-        //  * 2. Make a POST request to `/auth/register` with { username, email, password }
-        //  *    - Use your `client` axios instance from `@/api/client`
+        
         try {
           const response = await client.post("/auth/signup", {
             username,
@@ -119,7 +74,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           set({ error: errMessage, loading: false });
         }
-        return false; // placeholder
+        return false;
       },
 
       login: async (identifier, password) => {
@@ -162,11 +117,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             error: null,
           });
 
-          // Reset other stores that hold user-specific data
-          // TODO: uncomment these once those stores are implemented
-          // useBookmarkStore.getState().resetBookmarks();
-          // useDraftsStore.getState().resetDrafts();
-          // useEditorStore.getState().resetEditor();
+          useBookmarkStore.getState().resetBookmarks();
+          useDraftsStore.getState().resetDrafts();
+          useEditorStore.getState().resetEditor();
         }
       },
 
@@ -201,10 +154,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       clearError: () => {
         set({ error: null });
-        //  * WHEN TO CALL:
-        //  *  - At the start of every new login/signup attempt
-        //  *  - When the user starts typing in the auth form (clears stale errors)
-        //  *  - When navigating away from the auth page
       },
     }),
     {
