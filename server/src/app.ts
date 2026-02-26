@@ -5,9 +5,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import options from '@/config/corsOptions.js';
 import { errorHandler } from './middlewares/errorHandler.js';
-import { authRouter } from './routes/auth.routes.js';
-import { postRouter } from './routes/post.routes.js';
-import { userRouter } from './routes/user.routes.js';
+import { authRouter } from '@/routes/auth.routes.js';
+import { postRouter } from '@/routes/post.routes.js';
+import { userRouter } from '@/routes/user.routes.js';
 const app = express();
 
 app.use(helmet());
