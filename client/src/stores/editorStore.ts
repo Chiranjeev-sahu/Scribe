@@ -1,9 +1,17 @@
-import client from "@/api/client";
 import axios from "axios";
 import { create } from "zustand";
 
+import client from "@/api/client";
 
-type Category = "Technology" | "People" | "Culture" | "Lifestyle";
+type Category =
+  | "Technology"
+  | "People"
+  | "Culture"
+  | "Lifestyle"
+  | "technology"
+  | "people"
+  | "culture"
+  | "lifestyle";
 
 type JSONContent = Record<string, unknown>;
 
@@ -36,17 +44,16 @@ interface EditorActions {
   setCategory: (category: Category) => void;
   setSummary: (summary: string) => void;
   saveDraft: () => Promise<void>;
-  publish: () => Promise<boolean>;
+  publish: () => Promise<{ _id: string } | null>;
   resetEditor: () => void;
 }
-
 
 const initialState: EditorState = {
   postId: null,
   title: "",
   content: null,
   coverImage: null,
-  category: "Technology",
+  category: "technology",
   summary: "",
   status: "draft",
 
@@ -62,26 +69,34 @@ const initialState: EditorState = {
   loadError: null,
 };
 
-
 export const useEditorStore = create<EditorState & EditorActions>()(
   (set, get) => ({
     ...initialState,
 
-
     loadDraft: async (id) => {
-      get().resetEditor();
-      set({ isLoading: true, postId: id })
+      set({ ...initialState, isLoading: true, postId: id });
+
       try {
         const response = await client.get(`/post/${id}`);
+        const { title, content, coverImage, category, summary, status } =
+          response.data.data;
 
-        const { title, content, coverImage, category, summary, status } = response.data.data;
-
-        set({ title, content, coverImage, category, summary, status, isLoading: false, isDirty: false });
+        set({
+          title: title === "Untitled" ? "" : title || "",
+          content: content || null,
+          coverImage: coverImage || null,
+          category: category || "technology",
+          summary: summary || "",
+          status: status || "draft",
+          isLoading: false,
+          isDirty: false,
+        });
       } catch (error) {
-        let errMessage = "Error loading draft"
+        let errMessage = "Error loading draft";
 
         if (axios.isAxiosError(error)) {
-          errMessage = error.message || error.response?.data?.message;
+          errMessage =
+            error.response?.data?.message || error.message || errMessage;
         }
 
         set({ loadError: errMessage, isLoading: false });
@@ -89,7 +104,7 @@ export const useEditorStore = create<EditorState & EditorActions>()(
     },
 
     setTitle: (title) => {
-      set({ title, isDirty: true })
+      set({ title, isDirty: true });
     },
 
     setContent: (content) => {
@@ -105,18 +120,31 @@ export const useEditorStore = create<EditorState & EditorActions>()(
     },
 
     setSummary: (summary) => {
-      set({ summary });
+      set({ summary, isDirty: true });
     },
 
     saveDraft: async () => {
-      const { isDirty, postId, isSaving, title, content, coverImage, category } = get();
+      const {
+        isDirty,
+        postId,
+        isSaving,
+        title,
+        content,
+        coverImage,
+        category,
+      } = get();
 
       if (!isDirty || !postId || isSaving) return;
 
       set({ isSaving: true, saveError: null });
 
       try {
-        const payload = { title, content, coverImage, category };
+        const payload = {
+          title: title.trim() || "Untitled",
+          content,
+          coverImage,
+          category,
+        };
         await client.patch(`/post/${postId}`, payload);
 
         set({
@@ -127,7 +155,8 @@ export const useEditorStore = create<EditorState & EditorActions>()(
       } catch (error) {
         let errMessage = "Error saving draft";
         if (axios.isAxiosError(error)) {
-          errMessage = error.message || error.response?.data?.message || errMessage;
+          errMessage =
+            error.response?.data?.message || error.message || errMessage;
         }
         set({ isSaving: false, saveError: errMessage });
       }
@@ -136,38 +165,47 @@ export const useEditorStore = create<EditorState & EditorActions>()(
     publish: async () => {
       const { postId, title, summary, category, coverImage, content } = get();
 
-      if (!postId) return false;
+      if (!postId) return null;
 
       set({ isPublishing: true, publishError: null });
 
-      const isTitleValid = title && title.trim() !== "" && title.trim() !== "Untitled";
-      const isContentValid = content !== null && Object.keys(content).length > 0;
+      const isTitleValid =
+        title && title.trim() !== "" && title.trim() !== "Untitled";
+      const isContentValid =
+        content !== null && Object.keys(content).length > 0;
 
       if (!isTitleValid || !isContentValid || !category) {
         set({
           publishError: "Title and content are required to publish.",
-          isPublishing: false
+          isPublishing: false,
         });
-        return false;
+        return null;
       }
 
       try {
-        const payload = { title, summary, category, coverImage, content };
-        await client.patch(`/post/${postId}/publish`, payload);
+        const payload = {
+          title: title.trim(),
+          summary,
+          category,
+          coverImage,
+          content,
+        };
+        const response = await client.patch(`/post/${postId}/publish`, payload);
 
         set({
           isPublishing: false,
           status: "published",
+          isDirty: false,
         });
 
-        return true;
+        return response.data.data;
       } catch (error) {
         let errMessage = "Error publishing post";
         if (axios.isAxiosError(error)) {
           errMessage = error.response?.data?.message || errMessage;
         }
         set({ isPublishing: false, publishError: errMessage });
-        return false;
+        return null;
       }
     },
 

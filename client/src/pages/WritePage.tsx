@@ -1,62 +1,109 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
 import { ArrowLeft, ImagePlus, Loader2, X } from "lucide-react";
 
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { Button } from "@/components/ui/button";
+import { handleImageUpload as uploadToCloudinary } from "@/lib/tiptap-utils";
+import { useEditorStore } from "@/stores/editorStore";
+import { usePostsStore } from "@/stores/postsStore";
 
 export function WritePage() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [title, setTitle] = useState("");
-  const [coverImage, setCoverImage] = useState<string | null>(null);
-  const [category, setCategory] = useState<string>("technology");
-  const [content, setContent] = useState<any>(null);
-  const [isPublishing, setIsPublishing] = useState(false);
+  const { fetchPostById } = usePostsStore();
+
+  const {
+    title,
+    content,
+    coverImage,
+    category,
+    isLoading,
+    loadError,
+    isPublishing,
+    isDirty,
+    setTitle,
+    setContent,
+    setCoverImage,
+    setCategory,
+    loadDraft,
+    saveDraft,
+    publish,
+    resetEditor,
+  } = useEditorStore();
+
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setCoverImage(url);
-    }
-  };
+  useEffect(() => {
+    if (id) loadDraft(id);
 
-  const adjustTextareaHeight = () => {
+    return () => resetEditor();
+  }, [id, loadDraft, resetEditor]);
+
+  useEffect(() => {
+    if (!isDirty) return;
+
+    const timeoutId = setTimeout(() => {
+      saveDraft();
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [isDirty, title, content, coverImage, category, saveDraft]);
+
+  useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  };
-
-  useEffect(() => {
-    adjustTextareaHeight();
   }, [title]);
 
-  const handlePublish = async () => {
-    if (!title) return;
-    setIsPublishing(true);
-
-    // TODO: Connect to backend API
-    console.log({
-      title,
-      coverImage,
-      category,
-      content,
-      status: "published",
-    });
-
-    await new Promise((r) => setTimeout(r, 1000));
-    setIsPublishing(false);
-    navigate("/");
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsUploadingImage(true);
+      try {
+        const url = await uploadToCloudinary(file);
+        setCoverImage(url);
+      } catch (error) {
+        console.error("Failed to upload cover image:", error);
+      } finally {
+        setIsUploadingImage(false);
+      }
+    }
   };
+
+  const handlePublish = async () => {
+    const published = await publish();
+
+    if (published) {
+      const postId = published._id || id;
+      fetchPostById(postId!);
+      navigate(`/post/${postId}`, { replace: true });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="text-chart-2 h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-destructive">{loadError}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background min-h-screen pb-24">
-      {/* Top Navigation Bar */}
       <nav className="bg-background/95 sticky top-0 z-50 flex items-center justify-between border-b px-6 py-3 backdrop-blur-sm">
         <div className="flex items-center gap-4">
           <Link to="/">
@@ -71,7 +118,7 @@ export function WritePage() {
         <div className="flex items-center gap-3">
           <select
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => setCategory(e.target.value as any)}
             className="text-secondary-foreground hover:bg-secondary bg-secondary/50 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none"
           >
             <option value="technology">Technology</option>
@@ -82,7 +129,9 @@ export function WritePage() {
 
           <Button
             onClick={handlePublish}
-            disabled={isPublishing || !title || !content}
+            disabled={
+              isPublishing || isUploadingImage || !title.trim() || !content
+            }
           >
             {isPublishing ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -100,16 +149,21 @@ export function WritePage() {
               size="xs"
               className="text-muted-foreground hover:text-foreground gap-2"
               onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingImage}
             >
-              <ImagePlus className="h-3.5 w-3.5" />
-              Add cover image
+              {isUploadingImage ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <ImagePlus className="h-3.5 w-3.5" />
+              )}
+              {isUploadingImage ? "Uploading..." : "Add cover image"}
             </Button>
           ) : (
-            <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg border">
+            <div className="bg-muted relative h-full max-h-[280px] overflow-hidden rounded-sm border">
               <img
                 src={coverImage}
                 alt="Cover"
-                className="h-full max-h-28 w-full object-cover"
+                className="h-full w-full object-cover"
               />
               <Button
                 size="icon"
@@ -133,7 +187,6 @@ export function WritePage() {
           />
         </div>
 
-        {/* Title Input */}
         <div className="mb-8">
           <textarea
             ref={textareaRef}
@@ -147,10 +200,13 @@ export function WritePage() {
         </div>
       </div>
 
-      {/* The Editor — untouched, original width */}
       <main className="mt-10 w-svw">
         <div className="min-h-[400px]">
-          <SimpleEditor onUpdate={setContent} />
+          <SimpleEditor
+            key={id}
+            initialContent={content}
+            onUpdate={setContent}
+          />
         </div>
       </main>
     </div>

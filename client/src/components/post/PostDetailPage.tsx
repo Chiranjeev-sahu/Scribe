@@ -1,20 +1,30 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Link, useParams } from "react-router";
 
 import AutoScroll from "embla-carousel-auto-scroll";
+import { toast } from "sonner";
 
 import { PostCard } from "@/components/post/PostCard";
+import { ReadOnlyEditor } from "@/components/post/ReadOnlyEditor";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { mockPosts } from "@/data/data";
+import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils/utils";
+import { usePostsStore } from "@/stores/postsStore";
 
 export const PostDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const post = mockPosts.find((post) => post.id === Number(id));
+  const {
+    currentPost,
+    posts: allPosts,
+    loading,
+    error,
+    fetchPostById,
+    fetchPosts,
+  } = usePostsStore();
 
   const plugin = useRef(
     AutoScroll({
@@ -25,67 +35,91 @@ export const PostDetailPage = () => {
     })
   );
 
-  if (!post) {
-    return <div>Post not found</div>;
+  useEffect(() => {
+    if (id) {
+      fetchPostById(id);
+    }
+  }, [id, fetchPostById]);
+
+  useEffect(() => {
+    if (currentPost?.category) {
+      fetchPosts(1, currentPost.category, 6);
+    }
+  }, [currentPost?.category, fetchPosts]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
+  if (loading && !currentPost) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
-  const relatedPosts = mockPosts.filter(
-    (p) => p.category === post.category && p.id !== post.id
-  );
+  if (!currentPost) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+        <h2 className="font-sentient text-3xl">Post not found</h2>
+        <Link to="/" className="text-emrald-600 hover:underline">
+          Return Home
+        </Link>
+      </div>
+    );
+  }
+
+  const relatedPosts = allPosts.filter((p) => p._id !== currentPost._id);
 
   return (
     <main className="flex min-h-screen w-full flex-1 flex-col items-center justify-start gap-6 px-12 pt-8">
-      <header className="flex w-full max-w-2xl flex-col gap-8 border-t border-gray-200 py-2">
+      <header className="mt-8 flex w-full max-w-3xl flex-col gap-8 border-t border-gray-200 py-4">
         <div className="flex w-full items-center justify-between">
-          <span className="text-xs tracking-wider text-gray-600 uppercase">
-            {post.category}
+          <span className="text-xs font-semibold tracking-widest text-gray-500 uppercase">
+            {currentPost.category}
           </span>
 
           <time
-            dateTime={post.date}
-            className="text-xs tracking-wider text-gray-600 uppercase"
+            dateTime={currentPost.updatedAt}
+            className="text-xs font-semibold tracking-widest text-gray-500 uppercase"
           >
-            {formatDate(post.date, "uppercase")}
+            {formatDate(currentPost.updatedAt, "uppercase")}
           </time>
         </div>
 
-        <h1 className="font-sentient text-5xl leading-tight font-normal tracking-tight text-gray-900">
-          {post.title}
+        <h1 className="font-sentient text-6xl leading-tight font-normal tracking-tight text-gray-900">
+          {currentPost.title}
         </h1>
 
-        <p className="font-sentient text-base leading-relaxed text-gray-500">
-          {post.summary}
-        </p>
+        {currentPost.summary && (
+          <p className="font-sentient text-xl leading-relaxed text-gray-500 italic">
+            {currentPost.summary}
+          </p>
+        )}
       </header>
 
-      <img
-        src={post.coverImage}
-        alt={`Cover image for ${post.title}`}
-        className="h-[786px] w-full max-w-7xl rounded-sm object-cover"
-      />
+      {currentPost.coverImage && (
+        <img
+          src={currentPost.coverImage}
+          alt={`Cover image for ${currentPost.title}`}
+          className="h-[600px] w-full max-w-6xl rounded-lg object-cover shadow-sm"
+        />
+      )}
 
-      <article className="flex w-full max-w-2xl flex-col gap-8 py-8">
-        <p className="font-sentient text-lg leading-relaxed text-gray-700">
-          {post.content.introduction}
-        </p>
-        {post.content.sections.map((section, index) => (
-          <div key={index} className="flex flex-col gap-3">
-            <h2 className="font-sentient text-2xl font-semibold text-gray-900">
-              {section.heading}
-            </h2>
-            <p className="font-sentient text-base leading-relaxed text-gray-600">
-              {section.body}
-            </p>
-          </div>
-        ))}
+      {/* Tiptap Content Area */}
+      <article className="w-full max-w-3xl py-12">
+        <ReadOnlyEditor content={currentPost.content} />
       </article>
 
       {/* Related Posts Carousel Section */}
       {relatedPosts.length > 0 && (
-        <section className="flex w-screen flex-col gap-6 bg-gray-50 px-12 py-16">
-          <div className="mx-auto w-full max-w-3xl">
-            <h2 className="font-sentient mb-8 text-3xl font-semibold text-gray-900">
-              More in {post.category}
+        <section className="mt-20 flex w-screen flex-col gap-6 border-t border-gray-100 bg-gray-50/50 px-12 py-24">
+          <div className="mx-auto w-full max-w-4xl">
+            <h2 className="font-sentient mb-12 text-4xl font-normal tracking-tight text-gray-900">
+              More Stories in {currentPost.category}
             </h2>
 
             <div className="mask-r-from-90% mask-l-from-90%">
@@ -97,13 +131,13 @@ export const PostDetailPage = () => {
                 plugins={[plugin.current]}
                 className="w-full"
               >
-                <CarouselContent className="-ml-2 md:-ml-4">
+                <CarouselContent className="-ml-4">
                   {relatedPosts.map((relatedPost) => (
                     <CarouselItem
-                      key={relatedPost.id}
-                      className="pl-2 md:basis-1/2 md:pl-4 lg:basis-1/3"
+                      key={relatedPost._id}
+                      className="pl-4 md:basis-1/2 lg:basis-1/3"
                     >
-                      <Link to={`/post/${relatedPost.id}`}>
+                      <Link to={`/post/${relatedPost._id}`}>
                         <PostCard post={relatedPost} />
                       </Link>
                     </CarouselItem>
