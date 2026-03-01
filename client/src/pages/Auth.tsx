@@ -1,60 +1,86 @@
-import React, { useState } from "react";
-import { Navigate, useNavigate } from "react-router";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { replace, useNavigate } from "react-router";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/stores/authStore";
 
-export const Auth = () => {
+const loginSchema = z.object({
+  identifier: z.string().min(3, "Email or username is required"),
+  password: z.string().min(8, "At least 8 characters required"),
+});
+
+const signupSchema = z.object({
+  username: z
+    .string()
+    .min(3, "At least 3 characters")
+    .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, underscores"),
+  email: z.email("Invalid email"),
+  password: z.string().min(8, "At least 8 characters"),
+});
+
+export function Auth() {
+  const [isLogin, setIsLogin] = useState(true);
+  const { signup, login } = useAuthStore();
   const navigate = useNavigate();
-  const login = useAuthStore((s) => s.login);
-  const signup = useAuthStore((s) => s.signup);
-  const loading = useAuthStore((s) => s.loading);
-  const error = useAuthStore((s) => s.error);
-  const userData = useAuthStore((s) => s.userData);
-
-  if (userData) return <Navigate to={"/"} replace />;
-
-  interface FormData {
-    username: string;
-    email: string;
-    password: string;
-  }
-
-  const [isLogin, setIsLogin] = useState<boolean>(true);
-  const [formData, setFormData] = useState<FormData>({
-    username: "",
-    email: "",
-    password: "",
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting, isDirty, isValid },
+  } = useForm({
+    resolver: zodResolver(isLogin ? loginSchema : signupSchema),
+    defaultValues: isLogin
+      ? { identifier: "", password: "" }
+      : { username: "", email: "", password: "" },
+    mode: "onTouched",
   });
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
+  type LoginFormData = z.infer<typeof loginSchema>;
+  type SignupFormData = z.infer<typeof signupSchema>;
+
+  const onSubmit = async (data: LoginFormData | SignupFormData) => {
     let success = false;
     if (isLogin) {
-      success = await login(formData.email, formData.password);
+      const loginData = data as LoginFormData;
+      success = await login(loginData.identifier, loginData.password);
     } else {
+      const signupData = data as SignupFormData;
       success = await signup(
-        formData.username,
-        formData.email,
-        formData.password
+        signupData.username,
+        signupData.email,
+        signupData.password
       );
     }
     if (success) {
-      setFormData({ username: "", email: "", password: "" });
-      navigate("/");
+      toast.success(
+        isLogin ? "Welcome back!" : "Account created successfully!"
+      );
+      navigate("/", { replace: true });
+    } else {
+      const errorMsg = useAuthStore.getState().error;
+      toast.error(
+        errorMsg || (isLogin ? "Failed to login" : "Failed to sign up")
+      );
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const toggleMode = () => {
+    setIsLogin((prev) => !prev);
+    reset();
   };
 
   return (
     <main className="bg-background bg-auth-pattern flex min-h-screen items-center justify-center p-6 lg:px-8">
       <div className="bg-card w-full max-w-[350px] space-y-6 rounded-lg border p-6 shadow-sm">
         <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold">
             {isLogin ? "Welcome back" : "Create an account"}
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -64,62 +90,74 @@ export const Auth = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {isLogin ? (
             <div className="space-y-2">
-              <label
-                htmlFor="username"
-                className="text-sm leading-none font-medium"
+              <FormField
+                label="Email or Username"
+                error={errors.identifier?.message}
+                id="identifier"
               >
-                Username
-              </label>
-              <Input
-                id="username"
-                name="username"
-                placeholder="johndoe"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
+                <Input
+                  {...register("identifier")}
+                  id="identifier"
+                  placeholder="Enter email or username"
+                />
+              </FormField>
             </div>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <FormField
+                  label="Username"
+                  error={errors.username?.message}
+                  id="username"
+                >
+                  <Input
+                    {...register("username")}
+                    id="username"
+                    placeholder="Choose a username"
+                  />
+                </FormField>
+              </div>
+              <div className="space-y-2">
+                <FormField
+                  label="Email"
+                  error={errors.email?.message}
+                  id="email"
+                >
+                  <Input
+                    {...register("email")}
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                  />
+                </FormField>
+              </div>
+            </>
           )}
 
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm leading-none font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="m@example.com"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label
-              htmlFor="password"
-              className="text-sm leading-none font-medium"
-            >
-              Password
-            </label>
-            <Input
+            <FormField
+              label="Password"
+              error={errors.password?.message}
               id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            >
+              <Input
+                {...register("password")}
+                id="password"
+                type="password"
+                placeholder="Enter password"
+              />
+            </FormField>
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isSubmitting || !isDirty || !isValid}
+          >
+            {isSubmitting ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
           </Button>
         </form>
 
@@ -128,7 +166,8 @@ export const Auth = () => {
             {isLogin ? "Don't have an account? " : "Already have an account? "}
           </span>
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            type="button"
+            onClick={toggleMode}
             className="hover:text-primary font-medium underline underline-offset-4"
           >
             {isLogin ? "Sign up" : "Sign in"}
@@ -137,4 +176,4 @@ export const Auth = () => {
       </div>
     </main>
   );
-};
+}
