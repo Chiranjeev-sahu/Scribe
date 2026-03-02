@@ -28,6 +28,13 @@ const onResponseError = async (error: AxiosError): Promise<AxiosError> => {
   const originalRequest = error.config as RetryRequestConfig;
   if (!originalRequest) return Promise.reject(error);
 
+  if (
+    originalRequest.url === "/auth/login" ||
+    originalRequest.url === "/auth/signup"
+  ) {
+    return Promise.reject(error);
+  }
+
   if (error.response?.status === 401 && originalRequest.url !== "/refresh") {
     if (!originalRequest._retry) {
       originalRequest._retry = true;
@@ -42,7 +49,7 @@ const onResponseError = async (error: AxiosError): Promise<AxiosError> => {
 
       isRefreshing = true;
       try {
-        await client.get("/refresh");
+        await client.get("auth/refresh");
 
         processQueue(null);
 
@@ -60,7 +67,7 @@ const onResponseError = async (error: AxiosError): Promise<AxiosError> => {
   // Global safety net: any 401 that wasn't fixed above means session is dead
   if (error.response?.status === 401) {
     useAuthStore.getState().logout();
-    window.location.href = "/login";
+    window.location.href = "/auth";
   }
 
   return Promise.reject(error);

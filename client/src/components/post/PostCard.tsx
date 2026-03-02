@@ -1,15 +1,18 @@
-import { type Post } from "@/data/data";
 import { formatDate } from "@/lib/utils/utils";
+import { type PostSummary } from "@/stores/postsStore";
 
 type PostCardProps = {
-  post: Post;
+  post: PostSummary;
 };
 export const PostCard = ({ post }: PostCardProps) => {
   return (
     <article className="divide-chart-2 flex flex-col divide-y overflow-hidden">
       <div className="overflow-hidden pb-6">
         <img
-          src={post.coverImage}
+          src={
+            post.coverImage ||
+            "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
+          } // Cool abstract gradient fallback
           alt={`Cover image for ${post.title}`}
           className="aspect-3/2 h-2/3 w-full rounded-sm object-cover"
         />
@@ -20,10 +23,10 @@ export const PostCard = ({ post }: PostCardProps) => {
             {post.category}
           </span>
           <time
-            dateTime={post.date}
+            dateTime={post.updatedAt}
             className="text-xs tracking-wider text-gray-600 uppercase"
           >
-            {formatDate(post.date, "uppercase")}
+            {formatDate(post.updatedAt, "uppercase")}
           </time>
         </div>
 

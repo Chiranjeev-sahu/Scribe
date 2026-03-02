@@ -3,14 +3,13 @@ import { create } from "zustand";
 
 import client from "@/api/client";
 
-
 interface PostAuthor {
   _id: string;
   username: string;
   avatar?: string;
 }
 
-interface PostSummary {
+export interface PostSummary {
   _id: string;
   title: string;
   summary?: string;
@@ -18,7 +17,11 @@ interface PostSummary {
   category: string;
   author: PostAuthor;
   updatedAt: string;
-  createdAt: string;
+  createdAt?: string;
+}
+
+export interface PostDetail extends PostSummary {
+  content: any; // Tiptap JSON
 }
 
 interface Pagination {
@@ -29,10 +32,12 @@ interface Pagination {
 
 interface PostsState {
   posts: PostSummary[];
+  currentPost: PostDetail | null;
   pagination: Pagination | null;
   loading: boolean;
   error: string | null;
   currentCategory: string | null;
+  currentLimit: number;
 }
 
 interface PostsActions {
@@ -41,24 +46,26 @@ interface PostsActions {
     category?: string,
     limit?: number
   ) => Promise<void>;
+  fetchPostById: (id: string) => Promise<void>;
   loadMore: () => Promise<void>;
   setCategory: (category: string | null) => void;
   clearPosts: () => void;
 }
 
-
 export const usePostsStore = create<PostsState & PostsActions>()(
   (set, get) => ({
     posts: [],
+    currentPost: null,
     pagination: null,
     loading: false,
     error: null,
     currentCategory: null,
+    currentLimit: 10,
 
     fetchPosts: async (page = 1, category, limit = 10) => {
       if (get().loading) return;
 
-      set({ loading: true, error: null });
+      set({ loading: true, error: null, currentLimit: limit });
       try {
         const response = await client.get("/post", {
           params: { page, category, limit },
@@ -82,14 +89,31 @@ export const usePostsStore = create<PostsState & PostsActions>()(
       }
     },
 
+    fetchPostById: async (id) => {
+      set({ loading: true, error: null, currentPost: null });
+      try {
+        const response = await client.get(`/post/public/${id}`);
+        set({ currentPost: response.data.data, loading: false });
+      } catch (error) {
+        let errMessage = "Failed to fetch post";
+
+        if (axios.isAxiosError(error)) {
+          errMessage = error.response?.data?.message || errMessage;
+        }
+
+        set({ error: errMessage, loading: false });
+      }
+    },
+
     loadMore: async () => {
-      const { pagination, currentCategory } = get();
+      const { pagination, currentCategory, currentLimit } = get();
       if (!pagination || pagination.currentPage >= pagination.totalPages)
         return;
 
       await get().fetchPosts(
         pagination.currentPage + 1,
-        currentCategory ?? undefined
+        currentCategory ?? undefined,
+        currentLimit
       );
     },
 

@@ -1,6 +1,15 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+
+import { SquarePen } from "lucide-react";
+
+import { useAuthStore } from "@/stores/authStore";
+import { useDraftsStore } from "@/stores/draftsStore";
+
+import { AvatarDropdown } from "./UserDropDown";
 
 export const Navbar = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
   return (
     <header className="bg-background/95 sticky top-0 z-50 h-16 w-full border-b border-gray-100 backdrop-blur-sm">
       <nav className="flex h-full items-stretch justify-between px-24">
@@ -65,12 +74,30 @@ export const Navbar = () => {
           >
             About
           </Link>
-          <Link
-            to="/auth"
-            className="bg-chart-2 text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium"
-          >
-            Get Started
-          </Link>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-6">
+              <button
+                onClick={async () => {
+                  const id = await useDraftsStore.getState().createNewDraft();
+                  if (id) navigate(`/write/${id}`);
+                  console.log("Create draft clicked!");
+                }}
+                className="text-foreground group flex items-center gap-2"
+              >
+                <SquarePen className="h-4 w-4 font-medium transition-transform duration-500 ease-in-out group-hover:scale-110" />
+                <span className="text-sm font-medium">Write</span>
+              </button>
+
+              <AvatarDropdown />
+            </div>
+          ) : (
+            <Link
+              to="/auth"
+              className="bg-chart-2 text-primary-foreground hover:bg-chart-2/90 inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-medium transition-colors"
+            >
+              Get Started
+            </Link>
+          )}
         </div>
       </nav>
     </header>
