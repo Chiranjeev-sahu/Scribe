@@ -3,10 +3,10 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import client from "@/api/client";
+
 import { useBookmarkStore } from "./bookmarkStore";
 import { useDraftsStore } from "./draftsStore";
 import { useEditorStore } from "./editorStore";
-
 
 interface UserData {
   _id: string;
@@ -32,26 +32,23 @@ interface AuthActions {
   login: (identifier: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  updateProfile: (data: { bio?: string; avatar?: string }) => Promise<boolean>;
   updateUserData: (partial: Partial<UserData>) => void;
   clearError: () => void;
 }
 
-
 export const useAuthStore = create<AuthState & AuthActions>()(
   persist(
     (set, get) => ({
-
       userData: null,
       isAuthenticated: false,
       loading: false,
       error: null,
 
-
       signup: async (username, email, password) => {
-        
         get().clearError();
         set({ loading: true });
-        
+
         try {
           const response = await client.post("/auth/signup", {
             username,
@@ -60,8 +57,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           });
 
           set({
-            userData: response.data.data,
-            loading: false,
+            userData: response.data.data.user,
             isAuthenticated: true,
           });
           return true;
@@ -72,9 +68,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             errMessage = error.response?.data?.message || errMessage;
           }
 
-          set({ error: errMessage, loading: false });
+          set({ error: errMessage });
+          return false;
+        } finally {
+          set({ loading: false });
         }
-        return false;
       },
 
       login: async (identifier, password) => {
@@ -88,8 +86,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           });
 
           set({
-            userData: response.data.data,
-            loading: false,
+            userData: response.data.data.user,
             isAuthenticated: true,
           });
           return true;
@@ -100,9 +97,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             errMessage = error.response?.data?.message || errMessage;
           }
 
-          set({ error: errMessage, loading: false });
+          set({ error: errMessage });
+          return false;
+        } finally {
+          set({ loading: false });
         }
-        return false;
       },
 
       logout: async () => {
@@ -142,14 +141,31 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         //  *    So this "just works" — understand why!
       },
 
+      updateProfile: async (data) => {
+        const previousUserData = get().userData;
+        if (!previousUserData) return false;
+
+        set({ userData: { ...previousUserData, ...data }, error: null });
+
+        try {
+          await client.put("/user/me", data);
+          return true;
+        } catch (error) {
+          set({ userData: previousUserData });
+
+          let errMessage = "Failed to update profile";
+          if (axios.isAxiosError(error)) {
+            errMessage = error.response?.data?.message || errMessage;
+          }
+          set({ error: errMessage });
+          return false;
+        }
+      },
+
       updateUserData: (partial) => {
         const current = get().userData;
         if (!current) return;
         set({ userData: { ...current, ...partial } });
-        //  * WHEN IS THIS USED?
-        //  *  - After the user updates their profile (bio, avatar) on the settings page.
-        //  *  - You already have the updated data from the API response — no need to
-        //  *    re-fetch /me. Just merge locally.
       },
 
       clearError: () => {
