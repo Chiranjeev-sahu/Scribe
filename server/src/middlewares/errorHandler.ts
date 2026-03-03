@@ -18,9 +18,10 @@ export const errorHandler = (
     errors = err.issues;
   }
 
+  // If a raw token error makes it here somehow, handle it
   if (err.name === 'TokenExpiredError') {
     statusCode = 401;
-    message = 'Your session has expired. Please log in again.';
+    message = err.message || 'Token expired';
   }
 
   if (err.name === 'JsonWebTokenError') {

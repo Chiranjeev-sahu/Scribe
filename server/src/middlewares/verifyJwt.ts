@@ -12,13 +12,22 @@ export const verify = asyncHandler(
 
     if (!token) throw new AppError(401, 'Unauthorized');
 
-    const decoded = jwt.verify(
-      token,
-      process.env.ACCESS_TOKEN_SECRET!
-    ) as DecodedToken;
+    let decoded: DecodedToken;
+    try {
+      decoded = jwt.verify(
+        token,
+        process.env.ACCESS_TOKEN_SECRET!
+      ) as DecodedToken;
+    } catch (error: any) {
+      if (error.name === 'TokenExpiredError') {
+        throw new AppError(401, 'Token expired');
+      }
+      throw new AppError(401, 'Invalid access token');
+    }
+
     const userData = await User.findById(decoded?._id).select('-refreshToken');
 
-    if (!userData) throw new AppError(401, 'Invalid access token');
+    if (!userData) throw new AppError(401, 'User not found');
 
     req.user = userData;
     next();

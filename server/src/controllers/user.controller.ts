@@ -79,11 +79,13 @@ export const getMe = asyncHandler(async (req: AuthRequest, res: Response) => {
 
 export const updateProfile = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { avatar, bio } = req.body;
+    const updateData: Record<string, unknown> = {};
 
+    if (req.body.bio !== undefined) updateData.bio = req.body.bio;
+    if (req.body.avatar !== undefined) updateData.avatar = req.body.avatar;
     const updatedUser = await User.findByIdAndUpdate(
       req.user?._id,
-      { bio, avatar },
+      updateData,
       { new: true, runValidators: true }
     ).select('-password -refreshToken');
 

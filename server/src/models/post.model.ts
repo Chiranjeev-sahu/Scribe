@@ -37,7 +37,16 @@ const postSchema = new Schema<IPost>(
 
     category: {
       type: String,
-      enum: ['Technology', 'People', 'Culture', 'Lifestyle'],
+      enum: [
+        'Technology',
+        'People',
+        'Culture',
+        'Lifestyle',
+        'technology',
+        'people',
+        'culture',
+        'lifestyle',
+      ],
       required: true,
     },
     status: {

@@ -107,7 +107,7 @@ export const refreshAccessToken = asyncHandler(
       process.env.REFRESH_TOKEN_SECRET as string
     ) as DecodedToken;
 
-    const user = await User.findById(verified._id);
+    const user = await User.findById(verified._id).select('+refreshToken');
 
     if (!user) {
       throw new AppError(401, 'Invalid refresh token');

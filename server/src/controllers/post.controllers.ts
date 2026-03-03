@@ -16,7 +16,7 @@ export const createDraft = asyncHandler(
 
     const newDoc = await Post.create({
       title: 'Untitled',
-      content: { type: 'paragraph' },
+      content: { type: 'doc', content: [{ type: 'paragraph' }] },
       status: 'draft',
       author: authorId,
       category: 'Technology',
