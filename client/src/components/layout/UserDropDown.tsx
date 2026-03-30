@@ -10,11 +10,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/Dropdown-menu";
+import { useLogout } from "@/hooks/useLogout";
 import { useAuthStore } from "@/stores/authStore";
 
 export function AvatarDropdown() {
   const userdata = useAuthStore((state) => state.userData);
-  const logout = useAuthStore((state) => state.logout);
+  const logout = useLogout();
   if (!userdata) return null;
   return (
     <DropdownMenu>
@@ -31,8 +32,6 @@ export function AvatarDropdown() {
           <DropdownMenuItem asChild>
             <Link to={`/profile/${userdata.username}`}>Profile</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>Drafts</DropdownMenuItem>
-          <DropdownMenuItem>Bookmarks</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>

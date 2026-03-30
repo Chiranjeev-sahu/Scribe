@@ -33,7 +33,6 @@ interface AuthActions {
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   updateProfile: (data: { bio?: string; avatar?: string }) => Promise<boolean>;
-  updateUserData: (partial: Partial<UserData>) => void;
   clearError: () => void;
 }
 
@@ -160,12 +159,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           set({ error: errMessage });
           return false;
         }
-      },
-
-      updateUserData: (partial) => {
-        const current = get().userData;
-        if (!current) return;
-        set({ userData: { ...current, ...partial } });
       },
 
       clearError: () => {
