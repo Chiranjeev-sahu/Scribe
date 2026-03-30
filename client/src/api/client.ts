@@ -64,7 +64,6 @@ const onResponseError = async (error: AxiosError): Promise<AxiosError> => {
     }
   }
 
-  // Global safety net: any 401 that wasn't fixed above means session is dead
   if (error.response?.status === 401) {
     useAuthStore.getState().logout();
     window.location.href = "/auth";
