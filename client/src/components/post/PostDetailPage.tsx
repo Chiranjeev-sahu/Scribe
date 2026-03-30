@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link, useParams } from "react-router";
 
 import AutoScroll from "embla-carousel-auto-scroll";
+import { Bookmark } from "lucide-react";
 import { toast } from "sonner";
 
 import { PostCard } from "@/components/post/PostCard";
@@ -13,6 +14,8 @@ import {
 } from "@/components/ui/carousel";
 import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils/utils";
+import { useAuthStore } from "@/stores/authStore";
+import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { usePostsStore } from "@/stores/postsStore";
 
 export const PostDetailPage = () => {
@@ -25,6 +28,13 @@ export const PostDetailPage = () => {
     fetchPostById,
     fetchPosts,
   } = usePostsStore();
+
+  const loggedInUser = useAuthStore((state) => state.userData);
+  const { isBookmarked, toggleBookmark } = useBookmarkStore();
+
+  const isOwnPost =
+    loggedInUser?._id === currentPost?.author?._id ||
+    loggedInUser?._id === currentPost?.author;
 
   const plugin = useRef(
     AutoScroll({
@@ -82,12 +92,26 @@ export const PostDetailPage = () => {
             {currentPost.category}
           </span>
 
-          <time
-            dateTime={currentPost.updatedAt}
-            className="text-xs font-semibold tracking-widest text-gray-500 uppercase"
-          >
-            {formatDate(currentPost.updatedAt, "uppercase")}
-          </time>
+          <div className="flex items-center gap-4">
+            <time
+              dateTime={currentPost.updatedAt}
+              className="text-xs font-semibold tracking-widest text-gray-500 uppercase"
+            >
+              {formatDate(currentPost.updatedAt, "uppercase")}
+            </time>
+            {loggedInUser && !isOwnPost && (
+              <button
+                onClick={() => toggleBookmark(currentPost._id)}
+                className={`transition-colors ${isBookmarked(currentPost._id) ? "text-emerald-600" : "text-gray-400 hover:text-gray-900"}`}
+                title="Save Post"
+              >
+                <Bookmark
+                  className="h-5 w-5"
+                  fill={isBookmarked(currentPost._id) ? "currentColor" : "none"}
+                />
+              </button>
+            )}
+          </div>
         </div>
 
         <h1 className="font-sentient text-6xl leading-tight font-normal tracking-tight text-gray-900">
@@ -122,7 +146,7 @@ export const PostDetailPage = () => {
               More Stories in {currentPost.category}
             </h2>
 
-            <div className="mask-r-from-90% mask-l-from-90%">
+            <div className="mask-r-from-95% mask-l-from-95%">
               <Carousel
                 opts={{
                   align: "start",

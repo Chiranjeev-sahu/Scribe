@@ -12,7 +12,7 @@ export const Homepage = () => {
     usePostsStore();
 
   useEffect(() => {
-    fetchPosts(1, undefined, 4);
+    fetchPosts(1, undefined, 10);
   }, []);
 
   useEffect(() => {
