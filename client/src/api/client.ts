@@ -9,7 +9,7 @@ interface RetryRequestConfig extends InternalAxiosRequestConfig {
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value?: unknown) => void;
-  reject: (reason?: any) => void;
+  reject: (reason?: unknown) => void;
 }> = [];
 
 const processQueue = (error: AxiosError | null) => {
