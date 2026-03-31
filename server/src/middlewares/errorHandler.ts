@@ -1,11 +1,18 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { AppError } from '@/util/appError.js';
 import { ZodError } from 'zod';
 
+interface ExtendedError extends Error {
+  statusCode?: number;
+  errors?: unknown[];
+  isOperational?: boolean;
+}
+
 export const errorHandler = (
-  err: any,
-  req: Request,
+  err: ExtendedError,
+  _req: Request,
   res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ) => {
   let statusCode = err.statusCode || 500;
@@ -18,7 +25,6 @@ export const errorHandler = (
     errors = err.issues;
   }
 
-  // If a raw token error makes it here somehow, handle it
   if (err.name === 'TokenExpiredError') {
     statusCode = 401;
     message = err.message || 'Token expired';
@@ -30,31 +36,35 @@ export const errorHandler = (
   }
 
   if (process.env.NODE_ENV === 'development') {
-    return res.status(statusCode).json({
+    res.status(statusCode).json({
       success: false,
       message,
       errors,
       stack: err.stack,
     });
+    return;
   }
 
   const isOperational =
     err.isOperational ||
+    err instanceof AppError ||
     err instanceof ZodError ||
     err.name === 'TokenExpiredError' ||
     err.name === 'JsonWebTokenError';
 
   if (isOperational) {
-    return res.status(statusCode).json({
+    res.status(statusCode).json({
       success: false,
       message,
       errors,
     });
+    return;
   }
 
   console.error('PROGRAMMER ERROR ', err);
-  return res.status(500).json({
+  res.status(500).json({
     success: false,
     message: 'Something went wrong!',
   });
+  return;
 };

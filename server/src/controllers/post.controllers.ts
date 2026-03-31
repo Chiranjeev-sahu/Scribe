@@ -24,40 +24,47 @@ export const createDraft = asyncHandler(
 
     if (!newDoc) throw new AppError(500, 'Failed to create a new ');
 
-    return res
+    res
       .status(201)
       .json(
         new APIResponse(201, { _id: newDoc._id }, 'Draft created successfully')
       );
+    return;
   }
 );
 
 const opts = { runValidators: true, new: true };
 
 export const updateDraft = asyncHandler(
-  async (req: AuthRequest<paramsType, {}, updatePostSchema>, res: Response) => {
+  async (
+    req: AuthRequest<paramsType, unknown, updatePostSchema>,
+    res: Response
+  ) => {
     const post = await getAndAuthorizePost(req.params.id, req.user?._id);
     const updatedPost = await Post.findByIdAndUpdate(post._id, req.body, opts);
 
     if (!updatedPost) throw new AppError(500, 'Failed to update draft');
 
-    return res
-      .status(200)
-      .json(new APIResponse(200, updatedPost, 'Draft saved'));
+    res.status(200).json(new APIResponse(200, updatedPost, 'Draft saved'));
+    return;
   }
 );
 
 export const getDraft = asyncHandler(
   async (req: AuthRequest<paramsType>, res: Response) => {
     const post = await getAndAuthorizePost(req.params.id, req.user?._id);
-    return res
+    res
       .status(200)
       .json(new APIResponse(200, post, 'Fetched post successfully'));
+    return;
   }
 );
 
 export const publishPost = asyncHandler(
-  async (req: AuthRequest<paramsType, {}, updatePostSchema>, res: Response) => {
+  async (
+    req: AuthRequest<paramsType, unknown, updatePostSchema>,
+    res: Response
+  ) => {
     const post = await getAndAuthorizePost(req.params.id, req.user?._id);
 
     const finalTitle = req.body.title || post.title;
@@ -79,11 +86,12 @@ export const publishPost = asyncHandler(
 
     if (!publishedPost) throw new AppError(500, 'Could not publish post');
 
-    return res
+    res
       .status(200)
       .json(
         new APIResponse(200, publishedPost, 'Post published successfully!')
       );
+    return;
   }
 );
 
@@ -94,9 +102,8 @@ export const deletePost = asyncHandler(
     const deleted = await Post.findByIdAndDelete(post._id);
     if (!deleted) throw new AppError(500, 'Failed to delete');
 
-    return res
-      .status(200)
-      .json(new APIResponse(200, deleted, 'Deletion successful'));
+    res.status(200).json(new APIResponse(200, deleted, 'Deletion successful'));
+    return;
   }
 );
 
@@ -107,9 +114,10 @@ export const getDraftsList = asyncHandler(
       status: 'draft',
     }).select('title coverImage summary category updatedAt author');
 
-    return res
+    res
       .status(200)
       .json(new APIResponse(200, posts, 'Successfully fetched drafts'));
+    return;
   }
 );
 
@@ -124,11 +132,12 @@ export const getBookmarksList = asyncHandler(
 
     if (!user) throw new AppError(404, 'User not found');
 
-    return res
+    res
       .status(200)
       .json(
         new APIResponse(200, user.bookmarks, 'Successfully fetched bookmarks')
       );
+    return;
   }
 );
 
@@ -141,9 +150,8 @@ export const getPostById = asyncHandler(async (req: Request, res: Response) => {
 
   if (!post) throw new AppError(404, 'Post not found or is still a draft');
 
-  return res
-    .status(200)
-    .json(new APIResponse(200, post, 'Fetched post successfully'));
+  res.status(200).json(new APIResponse(200, post, 'Fetched post successfully'));
+  return;
 });
 
 export const getPosts = asyncHandler(async (req: Request, res: Response) => {
@@ -153,7 +161,7 @@ export const getPosts = asyncHandler(async (req: Request, res: Response) => {
 
   const offset = (page - 1) * limit;
 
-  const query: any = { status: 'published' };
+  const query: { status: string; category?: string } = { status: 'published' };
   if (category) {
     query.category = category;
   }
@@ -167,7 +175,7 @@ export const getPosts = asyncHandler(async (req: Request, res: Response) => {
 
   const totalPosts = await Post.countDocuments(query);
 
-  return res.status(200).json(
+  res.status(200).json(
     new APIResponse(
       200,
       {
@@ -181,4 +189,5 @@ export const getPosts = asyncHandler(async (req: Request, res: Response) => {
       'Successfully fetched posts'
     )
   );
+  return;
 });

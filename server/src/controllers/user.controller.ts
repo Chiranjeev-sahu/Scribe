@@ -22,7 +22,7 @@ export const getUserProfile = asyncHandler(
       status: 'published',
     });
 
-    return res
+    res
       .status(200)
       .json(
         new APIResponse(
@@ -31,6 +31,7 @@ export const getUserProfile = asyncHandler(
           'Profile fetched'
         )
       );
+    return;
   }
 );
 
@@ -61,7 +62,7 @@ export const toggleBookmark = asyncHandler(
       );
     }
 
-    return res
+    res
       .status(200)
       .json(
         new APIResponse(
@@ -70,15 +71,22 @@ export const toggleBookmark = asyncHandler(
           isBookmarked ? 'Bookmark removed' : 'Bookmark added'
         )
       );
+    return;
   }
 );
 
 export const getMe = asyncHandler(async (req: AuthRequest, res: Response) => {
-  return res.status(200).json(new APIResponse(200, req.user));
+  res.status(200).json(new APIResponse(200, req.user));
+  return;
 });
 
+type UpdateProfileBody = {
+  bio?: string;
+  avatar?: string;
+};
+
 export const updateProfile = asyncHandler(
-  async (req: AuthRequest, res: Response) => {
+  async (req: AuthRequest<object, unknown, UpdateProfileBody>, res: Response) => {
     const updateData: Record<string, unknown> = {};
 
     if (req.body.bio !== undefined) updateData.bio = req.body.bio;
@@ -91,8 +99,7 @@ export const updateProfile = asyncHandler(
 
     if (!updatedUser) throw new AppError(404, 'User not found');
 
-    return res
-      .status(200)
-      .json(new APIResponse(200, updatedUser, 'Profile updated'));
+    res.status(200).json(new APIResponse(200, updatedUser, 'Profile updated'));
+    return;
   }
 );

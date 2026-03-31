@@ -1,10 +1,9 @@
-import { IUser, IUserMethods, User } from '@/models/user.model.js';
+import { User } from '@/models/user.model.js';
 import { DecodedToken } from '@/types/index.js';
 import { AppError } from '@/util/appError.js';
 import { asyncHandler } from '@/util/asyncHandler.js';
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { HydratedDocument } from 'mongoose';
 import { AuthRequest } from '@/types/index.js';
 export const verify = asyncHandler(
   async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -18,8 +17,8 @@ export const verify = asyncHandler(
         token,
         process.env.ACCESS_TOKEN_SECRET!
       ) as DecodedToken;
-    } catch (error: any) {
-      if (error.name === 'TokenExpiredError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'TokenExpiredError') {
         throw new AppError(401, 'Token expired');
       }
       throw new AppError(401, 'Invalid access token');
