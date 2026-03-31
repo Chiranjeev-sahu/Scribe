@@ -4,7 +4,7 @@ export class AppError extends Error {
   constructor(
     public statusCode: number,
     public message: string,
-    public errors: any[] = []
+    public errors: unknown[] = []
   ) {
     super(message);
     this.isOperational = true;
