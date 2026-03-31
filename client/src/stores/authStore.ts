@@ -133,11 +133,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         } catch (error) {
           set({ userData: null, isAuthenticated: false, loading: false });
         }
-
-        //  * THINK ABOUT:
-        //  *  - This fires on every app load. If the access token is expired but the
-        //  *    refresh token is valid, your Axios interceptor handles it silently.
-        //  *    So this "just works" — understand why!
       },
 
       updateProfile: async (data) => {

@@ -35,7 +35,10 @@ const onResponseError = async (error: AxiosError): Promise<AxiosError> => {
     return Promise.reject(error);
   }
 
-  if (error.response?.status === 401 && originalRequest.url !== "/refresh") {
+  if (
+    error.response?.status === 401 &&
+    originalRequest.url !== "/auth/refresh"
+  ) {
     if (!originalRequest._retry) {
       originalRequest._retry = true;
 

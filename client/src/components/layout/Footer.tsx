@@ -19,7 +19,7 @@ export const Footer = () => {
           </p>
         </div>
         <Button variant="secondary" size="lg">
-          <Link to="/signup">Get Started</Link>
+          <Link to="/auth">Get Started</Link>
         </Button>
       </section>
 
@@ -58,7 +58,7 @@ export const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/signup"
+                  to="/auth"
                   className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
                   Get Started
@@ -145,7 +145,7 @@ export const Footer = () => {
         </div>
       </section>
 
-      {/* Copyright Section */}
+
       <section className="bg-background border-border text-muted-foreground flex items-center justify-center border-t px-24 py-6 text-sm">
         <p>© {new Date().getFullYear()} Scribe. All rights reserved.</p>
       </section>

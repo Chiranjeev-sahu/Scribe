@@ -1,5 +1,7 @@
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import { Camera, Loader2, Pen } from "lucide-react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -21,13 +23,16 @@ interface EditProfileDialogProps {
   onSuccess: (data: { bio: string; avatar: string }) => void;
 }
 
-export const EditProfileDialog = ({ userData, onSuccess }: EditProfileDialogProps) => {
+export const EditProfileDialog = ({
+  userData,
+  onSuccess,
+}: EditProfileDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [editBio, setEditBio] = useState(userData.bio || "");
   const [editAvatar, setEditAvatar] = useState(userData.avatar || "");
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const updateProfile = useAuthStore((state) => state.updateProfile);
 
   useEffect(() => {
@@ -50,7 +55,7 @@ export const EditProfileDialog = ({ userData, onSuccess }: EditProfileDialogProp
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     const success = await updateProfile({ bio: editBio, avatar: editAvatar });
     if (success) {
@@ -108,7 +113,9 @@ export const EditProfileDialog = ({ userData, onSuccess }: EditProfileDialogProp
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="bio" className="text-sm font-medium">Bio</label>
+            <label htmlFor="bio" className="text-sm font-medium">
+              Bio
+            </label>
             <textarea
               id="bio"
               value={editBio}

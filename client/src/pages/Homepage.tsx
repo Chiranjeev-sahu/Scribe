@@ -37,7 +37,7 @@ export const Homepage = () => {
         <Spinner />
       ) : posts.length === 0 ? (
         <div className="flex w-full items-center justify-center py-24">
-          {/* TODO: Remove this generic fallback later and replace with a nicer empty state if needed */}
+
           <h2 className="font-sentient text-3xl text-gray-500">
             No posts yet. Start writing!
           </h2>
@@ -75,7 +75,7 @@ export const Homepage = () => {
           </section>
         </div>
       )}
-      {/* Load More Button */}
+
       {pagination && pagination.currentPage < pagination.totalPages && (
         <div className="mt-8 flex justify-center">
           <button

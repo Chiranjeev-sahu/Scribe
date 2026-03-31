@@ -10,7 +10,7 @@ export const ProfileTabs = ({
   onTabChange,
 }: ProfileTabsProps) => {
   return (
-    <nav className="border-b pt-4">
+    <nav className="bg-background/95 lg-mx-0 sticky top-16 z-40 -mx-4 border-b px-4 pt-4 backdrop-blur-sm">
       <ul className="flex divide-x">
         {tabs.map((tab) => (
           <li
@@ -18,8 +18,8 @@ export const ProfileTabs = ({
             onClick={() => onTabChange(tab.id)}
             className={`flex-1 cursor-pointer px-6 py-3 text-center text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? "text-chart-2 bg-gray-100"
-                : "text-gray-500 hover:bg-gray-50"
+                ? "bg-emerald-800 text-gray-200"
+                : "text-gray-500 hover:bg-gray-100"
             }`}
           >
             {tab.label}

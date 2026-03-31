@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { PostCard } from "@/components/post/PostCard";
 import { ReadOnlyEditor } from "@/components/post/ReadOnlyEditor";
+import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
 import {
   Carousel,
   CarouselContent,
@@ -85,8 +86,30 @@ export const PostDetailPage = () => {
   const relatedPosts = allPosts.filter((p) => p._id !== currentPost._id);
 
   return (
-    <main className="flex min-h-screen w-full flex-1 flex-col items-center justify-start gap-6 px-12 pt-8">
-      <header className="mt-8 flex w-full max-w-3xl flex-col gap-8 border-t border-gray-200 py-4">
+    <main className="relative flex min-h-screen w-full flex-1 flex-col items-center justify-start gap-6 px-12 pt-8 overflow-x-hidden">
+      <div className="absolute top-8 right-12 z-50 flex items-center gap-4">
+        {!isOwnPost && currentPost.author && typeof currentPost.author !== "string" && (
+          <Link
+            to={`/profile/${currentPost.author.username}`}
+            className="flex items-center gap-2 rounded-full border border-gray-100 px-3 py-1 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800"
+          >
+            <img
+              src={
+                currentPost.author.avatar ||
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentPost.author.username}`
+              }
+              alt={currentPost.author.username}
+              className="h-6 w-6 rounded-full object-cover"
+            />
+            <span className="text-sm font-medium">
+              {currentPost.author.username}
+            </span>
+          </Link>
+        )}
+        <ThemeToggle />
+      </div>
+
+      <header className="mt-8 flex w-full max-w-3xl flex-col gap-8 border-t border-gray-200 py-4 dark:border-gray-800">
         <div className="flex w-full items-center justify-between">
           <span className="text-xs font-semibold tracking-widest text-gray-500 uppercase">
             {currentPost.category}

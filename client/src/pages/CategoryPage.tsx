@@ -13,7 +13,6 @@ export const CategoryPage = () => {
     usePostsStore();
 
   useEffect(() => {
-    // If it's "articles", we want all posts (null category)
     const category = categoryType === "articles" ? null : categoryType;
     const formattedCategory = category
       ? category.charAt(0).toUpperCase() + category.slice(1)
@@ -55,7 +54,7 @@ export const CategoryPage = () => {
             <PostList posts={posts} />
           </div>
 
-          {/* Load More Button */}
+
           {pagination && pagination.currentPage < pagination.totalPages && (
             <div className="mt-16 flex justify-center">
               <button

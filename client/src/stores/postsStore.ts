@@ -21,7 +21,7 @@ export interface PostSummary {
 }
 
 export interface PostDetail extends PostSummary {
-  content: any; // Tiptap JSON
+  content: any;
 }
 
 interface Pagination {

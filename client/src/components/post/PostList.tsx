@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { PostCard } from "./PostCard";
 
 type PostListProps = {
-  posts: any[]; // Accept any posts (Drafts or Published)
+  posts: any[];
   layout?: "grid" | "stack";
   linkPrefix?: string;
 };

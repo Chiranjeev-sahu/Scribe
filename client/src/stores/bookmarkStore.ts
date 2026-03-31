@@ -61,7 +61,7 @@ export const useBookmarkStore = create<BookmarkState & BookmarkActions>()(
       }
     },
 
-    //this is for identifying if the current open post's bookmark state  
+
     hydrateIds: (ids: Array<string>) => {
       set({ bookmarkedIds: new Set(ids) });
     },
