@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router";
 
 import { ArrowLeft, ImagePlus, Loader2, X } from "lucide-react";
 
+import { PublishDialog } from "@/components/profile/PublishDialog";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { Button } from "@/components/ui/button";
 import { handleImageUpload as uploadToCloudinary } from "@/lib/tiptap-utils";
@@ -37,6 +38,7 @@ export function WritePage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isDialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (id) loadDraft(id);
@@ -128,7 +130,7 @@ export function WritePage() {
           </select>
 
           <Button
-            onClick={handlePublish}
+            onClick={() => setDialogOpen(true)}
             disabled={
               isPublishing || isUploadingImage || !title.trim() || !content
             }
@@ -209,6 +211,11 @@ export function WritePage() {
           />
         </div>
       </main>
+      <PublishDialog
+        isOpen={isDialogOpen}
+        onOpenChange={setDialogOpen}
+        onConfirm={handlePublish}
+      />
     </div>
   );
 }

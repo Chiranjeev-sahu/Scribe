@@ -1,14 +1,12 @@
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 
-import { SquarePen } from "lucide-react";
-
+import { WriteButton } from "@/components/post/WriteButton";
+import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
 import { useAuthStore } from "@/stores/authStore";
-import { useDraftsStore } from "@/stores/draftsStore";
 
 import { AvatarDropdown } from "./UserDropDown";
 
 export const Navbar = () => {
-  const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   return (
     <header className="bg-background/95 sticky top-0 z-50 h-16 w-full border-b border-gray-100 backdrop-blur-sm">
@@ -68,26 +66,16 @@ export const Navbar = () => {
         </div>
 
         <div className="flex h-full items-center gap-4">
+          <ThemeToggle />
           <Link
             to="/about"
-            className="flex h-full items-center px-4 text-sm transition-colors hover:bg-gray-100"
+            className="flex h-full items-center px-4 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             About
           </Link>
           {isAuthenticated ? (
             <div className="flex items-center gap-6">
-              <button
-                onClick={async () => {
-                  const id = await useDraftsStore.getState().createNewDraft();
-                  if (id) navigate(`/write/${id}`);
-                  console.log("Create draft clicked!");
-                }}
-                className="text-foreground group flex items-center gap-2"
-              >
-                <SquarePen className="h-4 w-4 font-medium transition-transform duration-500 ease-in-out group-hover:scale-110" />
-                <span className="text-sm font-medium">Write</span>
-              </button>
-
+              <WriteButton />
               <AvatarDropdown />
             </div>
           ) : (
