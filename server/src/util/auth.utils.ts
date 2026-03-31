@@ -1,7 +1,10 @@
 import { User } from '@/models/user.model.js';
 import { AppError } from './appError.js';
 import { Response } from 'express';
-import { cookieOptions } from '@/config/cookieOptions.js';
+import {
+  accessTokenCookieOptions,
+  refreshTokenCookieOptions,
+} from '@/config/cookieOptions.js';
 import { APIResponse } from './apiResponse.js';
 
 const createAccAndRefTokens = async (userId: string) => {
@@ -28,8 +31,8 @@ export const sendAuthResponsewithTokens = async (
 
   return res
     .status(statuscode)
-    .cookie('accessToken', accessToken, cookieOptions)
-    .cookie('refreshToken', refreshToken, cookieOptions)
+    .cookie('accessToken', accessToken, accessTokenCookieOptions)
+    .cookie('refreshToken', refreshToken, refreshTokenCookieOptions)
     .json(
       new APIResponse(
         statuscode,

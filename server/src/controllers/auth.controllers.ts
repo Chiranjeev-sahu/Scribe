@@ -1,4 +1,7 @@
-import { cookieOptions } from '@/config/cookieOptions.js';
+import {
+  accessTokenCookieOptions,
+  refreshTokenCookieOptions,
+} from '@/config/cookieOptions.js';
 import { AuthRequest, DecodedToken } from '@/types/index.js';
 import { User } from '@/models/user.model.js';
 import { APIResponse } from '@/util/apiResponse.js';
@@ -10,7 +13,7 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 export const signup = asyncHandler(
-  async (req: Request<{}, {}, signupType>, res: Response) => {
+  async (req: Request<object, unknown, signupType>, res: Response) => {
     const { email, username, password } = req.body;
 
     const exists = await User.findOne({
@@ -33,17 +36,18 @@ export const signup = asyncHandler(
       bio: createdUser.bio,
     };
 
-    return await sendAuthResponsewithTokens(
+    await sendAuthResponsewithTokens(
       res,
       userResponse,
       201,
       'User registered successfully'
     );
+    return;
   }
 );
 
 export const login = asyncHandler(
-  async (req: Request<{}, {}, loginType>, res: Response) => {
+  async (req: Request<object, unknown, loginType>, res: Response) => {
     const { identifier, password } = req.body;
 
     const user = await User.findOne({
@@ -68,12 +72,13 @@ export const login = asyncHandler(
       bio: user.bio,
     };
 
-    return await sendAuthResponsewithTokens(
+    await sendAuthResponsewithTokens(
       res,
       userResponse,
       200,
       'User logged in successfully'
     );
+    return;
   }
 );
 
@@ -88,11 +93,12 @@ export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
     { new: true }
   );
 
-  return res
+  res
     .status(200)
-    .clearCookie('accessToken', cookieOptions)
-    .clearCookie('refreshToken', cookieOptions)
+    .clearCookie('accessToken', accessTokenCookieOptions)
+    .clearCookie('refreshToken', refreshTokenCookieOptions)
     .json(new APIResponse(200, {}, 'User logged out successfully'));
+  return;
 });
 
 export const refreshAccessToken = asyncHandler(
@@ -125,11 +131,12 @@ export const refreshAccessToken = asyncHandler(
       bio: user.bio,
     };
 
-    return await sendAuthResponsewithTokens(
+    await sendAuthResponsewithTokens(
       res,
       userResponse,
       200,
       'Access token refreshed successfully'
     );
+    return;
   }
 );

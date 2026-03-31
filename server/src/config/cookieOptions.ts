@@ -1,5 +1,15 @@
-export const cookieOptions = {
+const baseOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
+};
+
+export const accessTokenCookieOptions = {
+  ...baseOptions,
+  maxAge: 15 * 60 * 1000,
+};
+
+export const refreshTokenCookieOptions = {
+  ...baseOptions,
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
