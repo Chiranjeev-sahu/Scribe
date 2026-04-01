@@ -25,7 +25,24 @@ function App() {
   }, []);
   return (
     <>
-      <Toaster />
+      <Toaster 
+        position="top-right" 
+        richColors 
+        closeButton
+        toastOptions={{
+          style: {
+            fontFamily: "var(--font-sentient)",
+            borderRadius: "0.5rem",
+          },
+          classNames: {
+            toast: "group toast bg-background text-foreground border-border shadow-lg",
+            description: "text-muted-foreground",
+            actionButton: "bg-primary text-primary-foreground",
+            cancelButton: "bg-muted text-muted-foreground",
+            closeButton: "bg-background text-foreground border-border",
+          },
+        }}
+      />
       <ErrorBoundary
         FallbackComponent={ErrorFallback}
         onReset={() => navigate("/")}

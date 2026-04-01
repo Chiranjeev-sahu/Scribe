@@ -1,8 +1,8 @@
-import { useUIStore } from "@/stores/uiStore";
 // --- Icons ---
 import { MoonStarIcon } from "@/components/tiptap-icons/moon-star-icon";
 import { SunIcon } from "@/components/tiptap-icons/sun-icon";
 import { Button } from "@/components/tiptap-ui-primitive/button";
+import { useUIStore } from "@/stores/uiStore";
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useUIStore();
