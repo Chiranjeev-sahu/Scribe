@@ -4,7 +4,7 @@ import { User } from '@/models/user.model.js';
 import { APIResponse } from '@/util/apiResponse.js';
 import { AppError } from '@/util/appError.js';
 import { asyncHandler } from '@/util/asyncHandler.js';
-import { getAndAuthorizePost } from '@/util/getAndAuthrite.js';
+import { getAndAuthorizePost } from '@/util/getAndAuthrize.js';
 import { updatePostSchema } from '@/validators/post.schema.js';
 import { Response, Request } from 'express';
 import { paramsType } from '@/types/index.js';

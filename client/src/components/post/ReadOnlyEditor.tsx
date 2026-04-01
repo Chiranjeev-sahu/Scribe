@@ -10,7 +10,6 @@ import { Typography } from "@tiptap/extension-typography";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 
-
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/code-block-node/code-block-node.scss";
 import "@/components/tiptap-node/heading-node/heading-node.scss";
@@ -28,6 +27,11 @@ export const ReadOnlyEditor = ({ content }: ReadOnlyEditorProps) => {
   const editor = useEditor({
     editable: false,
     content: content,
+    editorProps: {
+      attributes: {
+        class: "simple-editor",
+      },
+    },
     extensions: [
       StarterKit.configure({
         horizontalRule: false,
@@ -44,7 +48,6 @@ export const ReadOnlyEditor = ({ content }: ReadOnlyEditorProps) => {
       Subscript,
     ],
   });
-
 
   useEffect(() => {
     if (editor && content) {
