@@ -234,8 +234,6 @@ export function SimpleEditor({ onUpdate, initialContent }: SimpleEditorProps) {
     ],
     content: initialContent,
     onUpdate: ({ editor }) => {
-      console.log(editor.getJSON());
-
       onUpdate?.(editor.getJSON());
     },
   });

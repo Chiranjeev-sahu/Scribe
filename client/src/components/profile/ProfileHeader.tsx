@@ -10,22 +10,15 @@ interface ProfileHeaderProps {
 
 export const ProfileHeader = ({ user }: ProfileHeaderProps) => {
   return (
-    <div className="flex items-center gap-6">
-      <Avatar className="h-20 w-20 text-2xl">
-        <AvatarImage
-          src={user.avatar || undefined}
-          alt={user.username}
-        />
-        <AvatarFallback>
-          {user.username.charAt(0).toUpperCase()}
-        </AvatarFallback>
+    <div className="flex items-center gap-4 md:gap-6">
+      <Avatar className="h-16 w-16 text-xl md:h-20 md:w-20 md:text-2xl">
+        <AvatarImage src={user.avatar || undefined} alt={user.username} />
+        <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
       </Avatar>
 
       <div>
-        <h1 className="font-sentient text-2xl font-medium">
-          {user.username}
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="font-sentient text-2xl font-medium">{user.username}</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
           {user.bio || "No bio added."}
         </p>
       </div>

@@ -78,7 +78,6 @@ export const PublishDialog = ({
 
         <div className="grid grid-cols-2 gap-6 py-4">
           <div className="flex flex-col gap-6">
-
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="title"
@@ -96,7 +95,6 @@ export const PublishDialog = ({
               />
             </div>
 
-
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="summary"
@@ -107,7 +105,7 @@ export const PublishDialog = ({
               <textarea
                 id="summary"
                 value={localSummary}
-                className="placeholder:text-muted-foreground/50 h-32 resize-none rounded-md border border-gray-200 bg-transparent p-3 text-sm focus:ring-1 focus:ring-gray-300 focus:outline-none"
+                className="placeholder:text-muted-foreground/50 border-border focus:ring-primary h-32 resize-none rounded-md border bg-transparent p-3 text-sm focus:outline-none focus:ring-1"
                 placeholder="Write a brief summary..."
                 onChange={(e) => setLocalSummary(e.target.value)}
               />

@@ -32,19 +32,19 @@ export const CategoryPage = () => {
       : categoryType?.charAt(0).toUpperCase() + (categoryType?.slice(1) || "");
 
   return (
-    <main className="mx-auto min-h-screen px-24 py-12">
+    <main className="mx-auto min-h-screen px-6 py-12 md:px-12 lg:px-24">
       <div className="mb-16">
-        <h1 className="font-sentient py-3 text-5xl tracking-tighter capitalize">
+        <h1 className="font-sentient py-3 text-3xl tracking-tighter capitalize md:text-5xl">
           {displayText}
         </h1>
-        <div className="bg-foreground mt-12 h-0.5 w-full" />
+        <div className="bg-foreground mt-8 h-0.5 w-full md:mt-12" />
       </div>
 
       {loading && posts.length === 0 ? (
         <Spinner />
       ) : posts.length === 0 ? (
         <div className="flex w-full items-center justify-center py-24">
-          <h2 className="font-sentient text-3xl text-gray-500">
+          <h2 className="font-sentient text-muted-foreground text-3xl">
             No posts found in this category.
           </h2>
         </div>
@@ -54,13 +54,12 @@ export const CategoryPage = () => {
             <PostList posts={posts} />
           </div>
 
-
           {pagination && pagination.currentPage < pagination.totalPages && (
             <div className="mt-16 flex justify-center">
               <button
                 onClick={loadMore}
                 disabled={loading}
-                className="rounded-md border border-gray-300 px-6 py-2.5 text-sm font-medium transition-colors hover:bg-gray-50 disabled:opacity-50"
+                className="border-border hover:bg-accent rounded-md border px-6 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
               >
                 {loading ? "Loading..." : "Load more articles"}
               </button>

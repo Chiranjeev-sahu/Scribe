@@ -3,7 +3,9 @@ import { useNavigate } from "react-router";
 
 import { useDraftsStore } from "@/stores/draftsStore";
 
-export const WriteButton = () => {
+import { cn } from "@/lib/utils/utils";
+
+export const WriteButton = ({ className }: { className?: string }) => {
   const navigate = useNavigate();
 
   return (
@@ -13,7 +15,7 @@ export const WriteButton = () => {
         if (id) navigate(`/write/${id}`);
         console.log("Create draft clicked!");
       }}
-      className="text-foreground group flex items-center gap-2"
+      className={cn("text-foreground group flex items-center gap-2", className)}
     >
       <SquarePen className="h-4 w-4 font-medium transition-transform duration-500 ease-in-out group-hover:scale-110" />
       <span className="text-sm font-medium">Write</span>

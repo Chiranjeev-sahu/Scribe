@@ -13,27 +13,24 @@ type PostCardProps =
       post: Omit<PostSummary, "author">;
     };
 
-const cardContainerVariants = cva(
-  "flex overflow-hidden transition-all hover:shadow-sm",
-  {
-    variants: {
-      variant: {
-        default: "flex-col divide-y divide-chart-2 h-full",
-        horizontal:
-          "flex-row-reverse items-start justify-between h-80 gap-6 border rounded-lg",
-      },
+const cardContainerVariants = cva("flex overflow-hidden transition-all ", {
+  variants: {
+    variant: {
+      default: "flex-col divide-y divide-primary h-full",
+      horizontal:
+        "flex-col md:flex-row-reverse items-start justify-between h-auto md:h-80 gap-6 rounded-lg",
     },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-);
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
 export const PostCard = ({ variant = "default", post }: PostCardProps) => {
   return (
     <article className={cardContainerVariants({ variant })}>
       <div
-        className={`overflow-hidden ${variant === "default" ? "aspect-16/13 w-full pb-6" : "h-full w-1/2 shrink-0"}`}
+        className={`overflow-hidden ${variant === "default" ? "aspect-16/13 w-full pb-6" : "h-48 md:h-full w-full md:w-1/2 shrink-0"}`}
       >
         <img
           src={
@@ -52,12 +49,12 @@ export const PostCard = ({ variant = "default", post }: PostCardProps) => {
           className={`flex w-full justify-between py-4 font-sans ${variant === "default" ? "items-center" : "items-start"}`}
         >
           {" "}
-          <span className="text-xs tracking-wider text-gray-600 uppercase">
+          <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
             {post.category}
           </span>
           <time
             dateTime={post.updatedAt}
-            className="text-xs tracking-wider text-gray-600 uppercase"
+            className="text-muted-foreground text-xs font-medium tracking-wider uppercase"
           >
             {formatDate(post.updatedAt, "uppercase")}
           </time>
@@ -67,7 +64,7 @@ export const PostCard = ({ variant = "default", post }: PostCardProps) => {
           <h2 className="font-sentient text-md overflow-clip">{post.title}</h2>
 
           <p
-            className={`font-sentient text-[13px] font-normal text-gray-400 ${variant === "horizontal" ? "line-clamp-2" : "overflow-clip"}`}
+            className={`font-sentient text-muted-foreground text-[13px] font-normal ${variant === "horizontal" ? "line-clamp-2" : "overflow-clip"}`}
           >
             {post.summary}
           </p>

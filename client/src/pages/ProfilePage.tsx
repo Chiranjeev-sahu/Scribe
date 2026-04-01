@@ -13,7 +13,6 @@ import { useAuthStore } from "@/stores/authStore";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
 import { useDraftsStore } from "@/stores/draftsStore";
 
-
 interface ProfileData {
   user: {
     _id: string;
@@ -82,7 +81,7 @@ export const ProfilePage = () => {
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <div className="border-chart-2 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
+        <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
       </div>
     );
   }
@@ -91,7 +90,7 @@ export const ProfilePage = () => {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
         <h1 className="text-2xl font-bold">404</h1>
-        <p className="text-gray-500">{error || "User not found"}</p>
+        <p className="text-muted-foreground">{error || "User not found"}</p>
       </div>
     );
   }
@@ -102,13 +101,12 @@ export const ProfilePage = () => {
         <ThemeToggle />
       </div>
       <div className="mx-auto flex w-full items-start justify-center gap-8 px-4 lg:px-10">
-        <section className="mb-4 flex w-full max-w-7xl min-w-0 items-start justify-between pt-2">
-
+        <section className="mb-4 flex w-full max-w-7xl min-w-0 flex-col items-start justify-between gap-6 pt-2 md:flex-row md:items-center">
           <ProfileHeader user={profileData.user} />
 
           {isOwnProfile && (
-            <div className="flex shrink-0 gap-2">
-              <WriteButton />
+            <div className="flex shrink-0 items-center gap-2">
+              <WriteButton className="border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md border p-2.5 transition-colors" />
               <EditProfileDialog
                 userData={profileData.user}
                 onSuccess={(newData) =>
@@ -126,8 +124,9 @@ export const ProfilePage = () => {
       </div>
       <div className="mx-auto flex w-full items-start justify-center gap-8 px-4 lg:px-10">
         <section className="relative flex w-full max-w-7xl min-w-0 flex-col">
-          <div className="absolute top-[-120px] left-[-16px] z-50 h-64 w-0.5 bg-linear-to-b from-transparent via-emerald-900 to-transparent"></div>
-          <div className="absolute top-0 left-[-128px] z-50 h-0.5 w-64 bg-linear-to-r from-transparent via-emerald-900 to-transparent"></div>
+          {/* Decorative lines - hidden on mobile to prevent overflow */}
+          <div className="via-primary absolute top-[-120px] left-[-16px] z-50 hidden h-64 w-0.5 bg-linear-to-b from-transparent to-transparent md:block"></div>
+          <div className="via-primary absolute top-0 left-[-128px] z-50 hidden h-0.5 w-64 bg-linear-to-r from-transparent to-transparent md:block"></div>
 
           {isOwnProfile && (
             <ProfileTabs
@@ -141,7 +140,7 @@ export const ProfilePage = () => {
             {activeTab === "published" && (
               <div className="flex flex-col gap-4">
                 {profileData.posts.length === 0 ? (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-muted-foreground text-sm">
                     No published posts yet.
                   </p>
                 ) : (
@@ -149,6 +148,18 @@ export const ProfilePage = () => {
                     posts={profileData.posts}
                     layout="stack"
                     linkPrefix="/post"
+                    onDelete={(postId) =>
+                      setProfileData((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              posts: prev.posts.filter(
+                                (p: any) => p._id !== postId
+                              ),
+                            }
+                          : prev
+                      )
+                    }
                   />
                 )}
               </div>
@@ -157,11 +168,20 @@ export const ProfilePage = () => {
             {activeTab === "drafts" && (
               <div className="flex flex-col gap-4">
                 {draftsLoading ? (
-                  <p className="text-sm text-gray-500">Loading drafts...</p>
+                  <p className="text-muted-foreground text-sm">
+                    Loading drafts...
+                  </p>
                 ) : drafts.length === 0 ? (
-                  <p className="text-sm text-gray-500">No drafts found.</p>
+                  <p className="text-muted-foreground text-sm">
+                    No drafts found.
+                  </p>
                 ) : (
-                  <PostList posts={drafts} layout="stack" linkPrefix="/write" />
+                  <PostList
+                    posts={drafts}
+                    layout="stack"
+                    linkPrefix="/write"
+                    onDelete={() => fetchDrafts()}
+                  />
                 )}
               </div>
             )}
@@ -169,9 +189,13 @@ export const ProfilePage = () => {
             {activeTab === "bookmarks" && (
               <div className="flex flex-col gap-4">
                 {bookmarksLoading ? (
-                  <p className="text-sm text-gray-500">Loading bookmarks...</p>
+                  <p className="text-muted-foreground text-sm">
+                    Loading bookmarks...
+                  </p>
                 ) : bookmarkedPosts.length === 0 ? (
-                  <p className="text-sm text-gray-500">No bookmarked posts.</p>
+                  <p className="text-muted-foreground text-sm">
+                    No bookmarked posts.
+                  </p>
                 ) : (
                   <PostList
                     posts={bookmarkedPosts}

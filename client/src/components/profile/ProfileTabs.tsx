@@ -16,10 +16,10 @@ export const ProfileTabs = ({
           <li
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`flex-1 cursor-pointer px-6 py-3 text-center text-sm font-medium transition-colors ${
+            className={`flex-1 cursor-pointer px-2 py-3 text-center text-sm font-medium transition-colors md:px-6 ${
               activeTab === tab.id
-                ? "bg-emerald-800 text-gray-200"
-                : "text-gray-500 hover:bg-gray-100"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             }`}
           >
             {tab.label}

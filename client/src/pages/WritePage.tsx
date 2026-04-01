@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router";
 
 import { ArrowLeft, ImagePlus, Loader2, X } from "lucide-react";
 
+import { DeletePostDialog } from "@/components/post/DeletePostDialog";
 import { PublishDialog } from "@/components/profile/PublishDialog";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { Button } from "@/components/ui/button";
@@ -91,7 +92,7 @@ export function WritePage() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="text-chart-2 h-8 w-8 animate-spin" />
+        <Loader2 className="text-primary h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -113,7 +114,7 @@ export function WritePage() {
               <ArrowLeft className="text-muted-foreground h-5 w-5" />
             </Button>
           </Link>
-          <span className="text-muted-foreground text-sm font-medium">
+          <span className="text-muted-foreground hidden text-sm font-medium md:flex">
             Drafting in {category}
           </span>
         </div>
@@ -128,6 +129,14 @@ export function WritePage() {
             <option value="culture">Culture</option>
             <option value="people">People</option>
           </select>
+
+          {id && (
+            <DeletePostDialog
+              postId={id}
+              postTitle={title || undefined}
+              onSuccess={() => navigate("/")}
+            />
+          )}
 
           <Button
             onClick={() => setDialogOpen(true)}
@@ -202,7 +211,7 @@ export function WritePage() {
         </div>
       </div>
 
-      <main className="mt-10 w-svw">
+      <main className="mt-10">
         <div className="min-h-[400px]">
           <SimpleEditor
             key={id}

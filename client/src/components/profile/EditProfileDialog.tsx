@@ -68,7 +68,7 @@ export const EditProfileDialog = ({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <button
-          className="rounded-md border border-gray-200 p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+          className="text-muted-foreground hover:bg-accent border-border rounded-md border p-2 transition-colors hover:text-foreground"
           title="Edit Profile"
         >
           <Pen className="h-4 w-4" />
@@ -109,7 +109,9 @@ export const EditProfileDialog = ({
                 onChange={handleAvatarUpload}
               />
             </div>
-            <p className="text-xs text-gray-500">Click to change avatar</p>
+            <p className="text-muted-foreground text-xs">
+              Click to change avatar
+            </p>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -120,7 +122,7 @@ export const EditProfileDialog = ({
               id="bio"
               value={editBio}
               onChange={(e) => setEditBio(e.target.value)}
-              className="font-sentient min-h-[100px] w-full resize-none rounded-md border border-gray-200 p-3 text-sm focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:outline-none"
+              className="font-sentient border-border focus:border-primary focus:ring-primary min-h-[100px] w-full resize-none rounded-md border p-3 text-sm focus:outline-none focus:ring-1"
               placeholder="Tell us about yourself..."
             />
           </div>
@@ -129,7 +131,7 @@ export const EditProfileDialog = ({
             <button
               type="submit"
               disabled={isUploadingAvatar}
-              className="rounded-md bg-emerald-600 px-6 py-2 text-sm text-white transition-colors hover:bg-emerald-500 disabled:opacity-50"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-md px-6 py-2 text-sm transition-colors disabled:opacity-50"
             >
               Save changes
             </button>
