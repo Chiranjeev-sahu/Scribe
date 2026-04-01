@@ -1,17 +1,20 @@
 import { Link } from "react-router";
 
+import { DeletePostDialog } from "./DeletePostDialog";
 import { PostCard } from "./PostCard";
 
 type PostListProps = {
   posts: any[];
   layout?: "grid" | "stack";
   linkPrefix?: string;
+  onDelete?: (postId: string) => void;
 };
 
 export const PostList = ({
   posts,
   layout = "grid",
   linkPrefix = "/post",
+  onDelete,
 }: PostListProps) => {
   return (
     <div
@@ -22,16 +25,26 @@ export const PostList = ({
       }
     >
       {posts.map((post) => (
-        <Link
-          to={`${linkPrefix}/${post._id}`}
-          key={`${post._id}`}
-          className="transition-opacity hover:opacity-90"
-        >
-          <PostCard
-            variant={layout === "grid" ? "default" : "horizontal"}
-            post={post}
-          />
-        </Link>
+        <div key={post._id} className="group relative">
+          <Link
+            to={`${linkPrefix}/${post._id}`}
+            className="block transition-opacity hover:opacity-90"
+          >
+            <PostCard
+              variant={layout === "grid" ? "default" : "horizontal"}
+              post={post}
+            />
+          </Link>
+          {onDelete && (
+            <div className="absolute bottom-2 left-2 opacity-0 transition-opacity group-hover:opacity-100">
+              <DeletePostDialog
+                postId={post._id}
+                postTitle={post.title}
+                onSuccess={() => onDelete(post._id)}
+              />
+            </div>
+          )}
+        </div>
       ))}
     </div>
   );
