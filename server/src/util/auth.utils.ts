@@ -38,8 +38,6 @@ export const sendAuthResponsewithTokens = async (
         statuscode,
         {
           user: userData,
-          accessToken,
-          refreshToken,
         },
         message
       )
