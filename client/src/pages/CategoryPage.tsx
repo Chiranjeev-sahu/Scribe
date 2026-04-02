@@ -32,7 +32,7 @@ export const CategoryPage = () => {
       : categoryType?.charAt(0).toUpperCase() + (categoryType?.slice(1) || "");
 
   return (
-    <main className="mx-auto min-h-screen px-6 py-12 md:px-12 lg:px-24">
+    <main className="mx-auto min-h-screen w-full px-6 py-12 md:px-12 lg:px-24">
       <div className="mb-16">
         <h1 className="font-sentient py-3 text-3xl tracking-tighter capitalize md:text-5xl">
           {displayText}
@@ -41,7 +41,9 @@ export const CategoryPage = () => {
       </div>
 
       {loading && posts.length === 0 ? (
-        <Spinner />
+        <div className="flex min-h-[400px] w-full items-center justify-center">
+          <Spinner />
+        </div>
       ) : posts.length === 0 ? (
         <div className="flex w-full items-center justify-center py-24">
           <h2 className="font-sentient text-muted-foreground text-3xl">

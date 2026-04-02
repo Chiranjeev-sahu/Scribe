@@ -5,8 +5,8 @@ import AutoScroll from "embla-carousel-auto-scroll";
 import { Bookmark } from "lucide-react";
 import { toast } from "sonner";
 
-import { PostCard } from "@/components/post/PostCard";
 import { DeletePostDialog } from "@/components/post/DeletePostDialog";
+import { PostCard } from "@/components/post/PostCard";
 import { ReadOnlyEditor } from "@/components/post/ReadOnlyEditor";
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
 import {
@@ -69,7 +69,9 @@ export const PostDetailPage = () => {
   if (loading && !currentPost) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spinner />
+        <div className="flex min-h-[400px] w-full items-center justify-center">
+          <Spinner />
+        </div>
       </div>
     );
   }

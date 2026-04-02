@@ -39,7 +39,7 @@ export const Footer = () => {
         aria-label="Call to action"
         className="bg-primary flex flex-col items-center justify-center gap-6 py-28 text-white"
       >
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-3 p-6 md:p-0">
           <h3 className="text-secondary font-sentient max-w-2xl text-center text-3xl md:text-4xl">
             Join our community of writers and share your stories
           </h3>

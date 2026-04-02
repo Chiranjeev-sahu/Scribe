@@ -124,7 +124,6 @@ export const ProfilePage = () => {
       </div>
       <div className="mx-auto flex w-full items-start justify-center gap-8 px-4 lg:px-10">
         <section className="relative flex w-full max-w-7xl min-w-0 flex-col">
-          {/* Decorative lines - hidden on mobile to prevent overflow */}
           <div className="via-primary absolute top-[-120px] left-[-16px] z-50 hidden h-64 w-0.5 bg-linear-to-b from-transparent to-transparent md:block"></div>
           <div className="via-primary absolute top-0 left-[-128px] z-50 hidden h-0.5 w-64 bg-linear-to-r from-transparent to-transparent md:block"></div>
 

@@ -1,7 +1,7 @@
 @import "./styles/_variables.scss";
 @import "./styles/_keyframe-animations.scss";
 @import "tailwindcss";
-@import "tw-animate-css" layer(components);
+@import "tw-animate-css";
 
 @font-face {
   font-family: "Sentient";

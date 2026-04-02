@@ -68,9 +68,10 @@ export const EditProfileDialog = ({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <button
-          className="text-muted-foreground hover:bg-accent border-border rounded-md border p-2 transition-colors hover:text-foreground"
+          className="text-muted-foreground hover:bg-accent border-border hover:text-foreground flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors"
           title="Edit Profile"
         >
+          <span>Edit profile</span>
           <Pen className="h-4 w-4" />
         </button>
       </DialogTrigger>
@@ -122,7 +123,7 @@ export const EditProfileDialog = ({
               id="bio"
               value={editBio}
               onChange={(e) => setEditBio(e.target.value)}
-              className="font-sentient border-border focus:border-primary focus:ring-primary min-h-[100px] w-full resize-none rounded-md border p-3 text-sm focus:outline-none focus:ring-1"
+              className="font-sentient border-border focus:border-primary focus:ring-primary min-h-[100px] w-full resize-none rounded-md border p-3 text-sm focus:ring-1 focus:outline-none"
               placeholder="Tell us about yourself..."
             />
           </div>

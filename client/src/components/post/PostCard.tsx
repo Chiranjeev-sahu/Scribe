@@ -1,4 +1,5 @@
 import { cva } from "class-variance-authority";
+import { motion } from "motion/react";
 
 import { formatDate } from "@/lib/utils/utils";
 import { type PostSummary } from "@/stores/postsStore";
@@ -18,7 +19,7 @@ const cardContainerVariants = cva("flex overflow-hidden transition-all ", {
     variant: {
       default: "flex-col divide-y divide-primary h-full",
       horizontal:
-        "flex-col md:flex-row-reverse items-start justify-between h-auto md:h-80 gap-6 rounded-lg",
+        "flex-col divide-y divide-primary md:flex-row-reverse md:divide-y-0 items-start justify-between h-auto md:h-80 gap-6 rounded-lg",
     },
   },
   defaultVariants: {
@@ -28,11 +29,20 @@ const cardContainerVariants = cva("flex overflow-hidden transition-all ", {
 
 export const PostCard = ({ variant = "default", post }: PostCardProps) => {
   return (
-    <article className={cardContainerVariants({ variant })}>
+    <motion.article
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-10%" }}
+      transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
+      whileHover={{ y: -6 }}
+      className={cardContainerVariants({ variant })}
+    >
       <div
-        className={`overflow-hidden ${variant === "default" ? "aspect-16/13 w-full pb-6" : "h-48 md:h-full w-full md:w-1/2 shrink-0"}`}
+        className={`overflow-hidden pb-6 ${variant === "default" ? "aspect-16/13 w-full" : "h-48 w-full shrink-0 md:h-full md:w-1/2 md:pb-0"}`}
       >
-        <img
+        <motion.img
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.4 }}
           src={
             post.coverImage ||
             "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
@@ -70,6 +80,6 @@ export const PostCard = ({ variant = "default", post }: PostCardProps) => {
           </p>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 };
