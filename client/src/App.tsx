@@ -16,8 +16,10 @@ import { WritePage } from "@/pages/WritePage";
 
 import { ProfilePage } from "./pages/ProfilePage";
 import { useAuthStore } from "./stores/authStore";
+import { useUIStore } from "./stores/uiStore";
 
 function App() {
+  const theme = useUIStore((state) => state.theme);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,9 +27,9 @@ function App() {
   }, []);
   return (
     <>
-      <Toaster 
-        position="top-right" 
-        richColors 
+      <Toaster
+        theme={theme}
+        position="top-right"
         closeButton
         toastOptions={{
           style: {
@@ -35,7 +37,8 @@ function App() {
             borderRadius: "0.5rem",
           },
           classNames: {
-            toast: "group toast bg-background text-foreground border-border shadow-lg",
+            toast:
+              "group toast bg-background text-foreground border-border shadow-lg",
             description: "text-muted-foreground",
             actionButton: "bg-primary text-primary-foreground",
             cancelButton: "bg-muted text-muted-foreground",
