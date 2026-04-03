@@ -1,5 +1,3 @@
-import { type FieldError } from "react-hook-form";
-
 interface FormFieldProps {
   label: string;
   id: string;
