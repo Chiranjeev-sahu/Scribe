@@ -76,7 +76,7 @@ const onResponseError = async (error: AxiosError): Promise<AxiosError> => {
 };
 
 const client = axios.create({
-  baseURL: "https://scribe-roie.onrender.com",
+  baseURL: "https://scribe-roie.onrender.com/api/v1",
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
   timeout: 10000,
