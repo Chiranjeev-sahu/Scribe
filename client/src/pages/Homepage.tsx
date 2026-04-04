@@ -50,7 +50,7 @@ export const Homepage = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="min-h-screen px-6 py-12 md:px-12 lg:px-24"
+      className="mx-auto min-h-screen w-full px-6 py-12 md:px-12 lg:px-24"
     >
       <div className="mb-16">
         <motion.h1
