@@ -8,6 +8,7 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import { authRouter } from '@/routes/auth.routes.js';
 import { postRouter } from '@/routes/post.routes.js';
 import { userRouter } from '@/routes/user.routes.js';
+import { cleanupRouter } from '@/routes/cleanup.routes.js';
 const app = express();
 
 app.use(helmet());
@@ -20,6 +21,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/post', postRouter);
 app.use('/api/v1/user', userRouter);
 
+app.use('/api/v1/cleanup', cleanupRouter);
 app.use(errorHandler);
 
 export { app };
