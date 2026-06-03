@@ -147,17 +147,20 @@ export const ProfilePage = () => {
                     posts={profileData.posts}
                     layout="stack"
                     linkPrefix="/post"
-                    onDelete={(postId) =>
-                      setProfileData((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              posts: prev.posts.filter(
-                                (p: any) => p._id !== postId
-                              ),
-                            }
-                          : prev
-                      )
+                    onDelete={
+                      isOwnProfile
+                        ? (postId) =>
+                            setProfileData((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    posts: prev.posts.filter(
+                                      (p: any) => p._id !== postId
+                                    ),
+                                  }
+                                : prev
+                            )
+                        : undefined
                     }
                   />
                 )}

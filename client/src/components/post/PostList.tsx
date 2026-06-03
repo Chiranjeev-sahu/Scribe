@@ -1,5 +1,7 @@
 import { Link } from "react-router";
 
+import { useAuthStore } from "@/stores/authStore";
+
 import { DeletePostDialog } from "./DeletePostDialog";
 import { PostCard } from "./PostCard";
 
@@ -16,6 +18,7 @@ export const PostList = ({
   linkPrefix = "/post",
   onDelete,
 }: PostListProps) => {
+  const loggedInUser = useAuthStore((state) => state.userData);
   return (
     <div
       className={
@@ -24,28 +27,34 @@ export const PostList = ({
           : "flex flex-col gap-4"
       }
     >
-      {posts.map((post) => (
-        <div key={post._id} className="group relative">
-          <Link
-            to={`${linkPrefix}/${post._id}`}
-            className="block transition-opacity hover:opacity-90"
-          >
-            <PostCard
-              variant={layout === "grid" ? "default" : "horizontal"}
-              post={post}
-            />
-          </Link>
-          {onDelete && (
-            <div className="absolute bottom-2 left-2 opacity-0 transition-opacity group-hover:opacity-100">
-              <DeletePostDialog
-                postId={post._id}
-                postTitle={post.title}
-                onSuccess={() => onDelete(post._id)}
+      {posts.map((post) => {
+        const isOwnPost =
+          loggedInUser?._id === post?.author?._id ||
+          loggedInUser?._id === post?.author;
+
+        return (
+          <div key={post._id} className="group relative">
+            <Link
+              to={`${linkPrefix}/${post._id}`}
+              className="block transition-opacity hover:opacity-90"
+            >
+              <PostCard
+                variant={layout === "grid" ? "default" : "horizontal"}
+                post={post}
               />
-            </div>
-          )}
-        </div>
-      ))}
+            </Link>
+            {onDelete && isOwnPost && (
+              <div className="absolute bottom-2 left-2 opacity-0 transition-opacity group-hover:opacity-100">
+                <DeletePostDialog
+                  postId={post._id}
+                  postTitle={post.title}
+                  onSuccess={() => onDelete(post._id)}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
