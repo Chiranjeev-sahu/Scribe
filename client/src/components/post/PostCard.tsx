@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { cva } from "class-variance-authority";
 import { motion } from "motion/react";
 
@@ -27,7 +29,7 @@ const cardContainerVariants = cva("flex overflow-hidden transition-all ", {
   },
 });
 
-export const PostCard = ({ variant = "default", post }: PostCardProps) => {
+export const PostCard = memo(({ variant = "default", post }: PostCardProps) => {
   return (
     <motion.article
       initial={{ opacity: 0, y: 30 }}
@@ -82,4 +84,4 @@ export const PostCard = ({ variant = "default", post }: PostCardProps) => {
       </div>
     </motion.article>
   );
-};
+});

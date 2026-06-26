@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, FC } from "react";
 import { Link } from "react-router";
 
 import { motion } from "motion/react";
@@ -8,13 +8,33 @@ import { PostCard } from "@/components/post/PostCard";
 import { Spinner } from "@/components/ui/spinner";
 import { usePostsStore } from "@/stores/postsStore";
 
-export const Homepage = () => {
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8 },
+  },
+};
+
+export const Homepage: FC = () => {
   const { posts, loading, error, pagination, fetchPosts, loadMore } =
     usePostsStore();
 
   useEffect(() => {
     fetchPosts(1, undefined, 10);
-  }, []);
+  }, [fetchPosts]);
 
   useEffect(() => {
     if (error) {
@@ -22,28 +42,8 @@ export const Homepage = () => {
     }
   }, [error]);
 
-  const recentPosts = posts.slice(3);
-  const featuredPosts = posts.slice(0, 3);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.8 },
-    },
-  };
+  const recentPosts = useMemo(() => posts.slice(3), [posts]);
+  const featuredPosts = useMemo(() => posts.slice(0, 3), [posts]);
 
   return (
     <motion.main
